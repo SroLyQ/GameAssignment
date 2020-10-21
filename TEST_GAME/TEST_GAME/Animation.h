@@ -1,10 +1,10 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+#include "Initial.h"
 class Animation
 {
 public:
 	Animation(sf::Texture* texture,sf::Vector2u imageCount,float switchTime);
-	//~Animation();
+	~Animation();
 
 	void Update(float deltaTime,bool faceRight);
 public:

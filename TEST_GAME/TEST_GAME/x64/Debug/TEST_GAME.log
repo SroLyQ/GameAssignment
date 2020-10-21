@@ -1,2 +1,8 @@
-﻿  main.cpp
+﻿  Bullet.cpp
+  Player.cpp
+  main.cpp
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(94,63): warning C4244: '=': conversion from 'sf::Int32' to 'float', possible loss of data
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(119,10): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'unsigned __int64'
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(119,10): message : consider using '%zd' in the format string
+  Generating Code...
   TEST_GAME.vcxproj -> C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\x64\Debug\TEST_GAME.exe

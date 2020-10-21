@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "Animation.h"
-#include <iostream>
-
+#include "bullet.h"
+#include "Initial.h"
 Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,float jumpHeight):
 	animation(texture,imageCount,switchTime)
 {
@@ -9,6 +9,7 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 	this->jumpHeight = jumpHeight;
 	faceRight = true;
 	canJump = true;
+	shootingBool = false;
 
 	body.setSize(sf::Vector2f(30.0f,36.0f));
 	body.setOrigin(body.getSize() / 2.0f);
@@ -20,6 +21,7 @@ Player::~Player()
 }
 void Player::Update(sf::Texture* texture,float deltaTime)
 {
+	shootingBool = false;
 	velocity.x = 0.0f;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 		velocity.x -= speed;
@@ -30,7 +32,14 @@ void Player::Update(sf::Texture* texture,float deltaTime)
 		canJump = false;
 		velocity.y = -sqrtf(2.0f * 981.0f * jumpHeight);
 	}
-	std::cout << velocity.x << " " << velocity.y << std::endl;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+		velocity.y = 981.0f;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+		if(shootingBool==false)
+			shootingBool = true;
+	}
+	//std::cout << velocity.x << " " << velocity.y << std::endl;
 	velocity.y += 981.0f*deltaTime;
 
 	if (velocity.x == 0.0f){
@@ -42,6 +51,11 @@ void Player::Update(sf::Texture* texture,float deltaTime)
 			faceRight = true;
 		else
 			faceRight = false;
+	}
+	switch (gunType){
+		case 1:
+			delayShoot = 150.0f;
+			break;
 	}
 	animation.Update(deltaTime, faceRight);
 	body.setTextureRect(animation.uvRect);
@@ -69,4 +83,9 @@ void Player::OnCollision(sf::Vector2f direction)
 	else if (direction.y > 0.0f) {
 		velocity.y = 0.0f;
 	}
+}
+
+void Player::setGunType(int gunType)
+{
+	this->gunType = gunType;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include <SFML\Graphics.hpp>
+#include "Initial.h"
 class Collider
 {
 public:
