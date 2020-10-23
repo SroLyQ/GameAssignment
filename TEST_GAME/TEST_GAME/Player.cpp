@@ -54,7 +54,7 @@ void Player::Update(sf::Texture* texture,float deltaTime)
 	}
 	switch (gunType){
 		case 1:
-			delayShoot = 150.0f;
+			delayShoot = 500.0f;
 			break;
 	}
 	animation.Update(deltaTime, faceRight);

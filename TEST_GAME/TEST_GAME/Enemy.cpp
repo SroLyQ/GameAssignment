@@ -1,10 +1,9 @@
 #include "Enemy.h"
 
-Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type,float hp):
+Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type):
 	animation(texture, imageCount, switchTime)
 {
 	this->speed = speed;
-	this->hp = hp;
 	srand(time(NULL));
 	int ran=rand();
 	printf("ran = %d", ran);
@@ -20,6 +19,7 @@ Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, fl
 
 	switch (type) {
 	case 1: 
+		this->hp=150.0f;
 		body.setSize(sf::Vector2f(30.0f, 36.0f));
 		body.setOrigin(body.getSize() / 2.0f);
 		body.setPosition(540.0f, 0.0f);
@@ -32,7 +32,7 @@ Enemy::~Enemy()
 {
 }
 
-void Enemy::Update(sf::Texture* texture, float deltaTime)
+void Enemy::Update( float deltaTime)
 {	
 	if (velocity.x < 0) {
 		faceRight = false;
@@ -69,4 +69,14 @@ void Enemy::OnCollision(sf::Vector2f direction)
 	}
 
 	//std::cout << velocity.x << " " << velocity.y << std::endl;
+}
+
+void Enemy::hitWithBullet(Bullet& bullet)
+{
+	hp-=bullet.GetDamage();
+	
+	printf("Hit");
+	if (hp <= 0) {
+		isDeadBool = true;
+	}
 }

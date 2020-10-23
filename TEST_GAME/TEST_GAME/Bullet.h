@@ -10,9 +10,11 @@ public:
 
 	void Draw(sf::RenderWindow& window);
 	void Update(float deltaTime);
+	void setDestroy(bool isDestroy);
 
 	Collider GetCollider() { return Collider(body); }
 	bool isDestroy() { return isDestroyBool; }
+	float GetDamage() { return damage; }
 
 private:
 	sf::RectangleShape body;
@@ -21,6 +23,6 @@ private:
 	bool faceRight;
 	float speed;
 	bool isDestroyBool;
-
+	float damage;
 };
 

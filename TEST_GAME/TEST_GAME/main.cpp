@@ -1,5 +1,4 @@
 #include "Initial.h"
-#include <iostream>
 #include "Collider.h"
 #include "Platform.h"
 #include "Player.h"
@@ -7,11 +6,16 @@
 #include "Enemy.h"
 #include "bullet.h"
 
+void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collider col, sf::Vector2f direction);
+void platformCollisionWithBullets(std::vector<Platform>& vect, Bullet& bullet, Collider col, sf::Vector2f direction);
 void playerCollisionWithPlatforms(std::vector<Platform>& vect, Player& player, Collider col, sf::Vector2f direction);
 void enemyCollisionWithPlatforms(std::vector<Platform>& vect, Enemy& enemy, Collider col, sf::Vector2f direction);
 void drawPlatform(std::vector<Platform>& vect, sf::RenderWindow& window);
 void drawBullet(std::vector<Bullet>& vect, sf::RenderWindow& window);
+void drawEnemies(std::vector<Enemy>& vect, sf::RenderWindow& window);
 void updateBullet(std::vector<Bullet>& vect, float deltaTime);
+void updateEnemies(std::vector<Enemy>& vect, float deltaTime);
+void createEnemy(std::vector<Enemy>& vect, int type, sf::Texture* textureG, sf::Texture* textureR);
 
 int main()
 {
@@ -27,8 +31,17 @@ int main()
 	sf::Texture Wall1;
 	sf::Texture Floor1;
 	sf::Texture Platform1;
-	sf::Texture enemyTexture;
 	sf::Texture spawnTop;
+	sf::Texture enemyTextureG;
+	sf::Texture enemyTextureR;
+
+
+	if (!playerTexture.loadFromFile("Sprite/Player/Animation_Idle_R.png")) printf("Load File Error");
+	BG_ColorTexture.loadFromFile("Sprite/Background/BG_Color.png");
+	BG_BuildingTexture.loadFromFile("Sprite/Background/Buildings.png");
+	if (!enemyTextureG.loadFromFile("Sprite/Monster/Animation_Walk_Monster1.png")) printf("Load File Error");
+	if (!enemyTextureR.loadFromFile("Sprite/Monster/Animation_Walk_Monster1.png")) printf("Load File Error");
+
 	/// Window ///
 	sf::RenderWindow window(sf::VideoMode(1080, 720), "TEST_GAME", sf::Style::Close | sf::Style::Resize);
 	//variable
@@ -58,12 +71,6 @@ int main()
 
 	spawns.push_back(Platform(nullptr, sf::Vector2f(80.0f, 40.0f), sf::Vector2f(540.0f, 5.0f)));
 	spawns.push_back(Platform(nullptr, sf::Vector2f(80.0f, 40.0f), sf::Vector2f(540.0f, 715.0f)));
-
-	if (!playerTexture.loadFromFile("Sprite/Player/Animation_Idle_R.png")) printf("Load File Error");
-	BG_ColorTexture.loadFromFile("Sprite/Background/BG_Color.png");
-	BG_BuildingTexture.loadFromFile("Sprite/Background/Buildings.png");
-	enemyTexture.loadFromFile("Sprite/Monster/Animation_Walk_Monster1.png");
-
 	/// Sprite ///
 	sf::Sprite BG_Color;
 	sf::Sprite BG_Building;
@@ -73,27 +80,34 @@ int main()
 
 	// ANIMATION //
 	Player player(&playerTexture, sf::Vector2u(5, 1), 0.135f,200.0f,140.0f);
-	Enemy enemy(&enemyTexture, sf::Vector2u(11, 1), 0.095f, 150.0f, 1,100);
 	float deltaTime = 0.0f;
 	sf::Clock clock;
 	
 	//Collider
 	Collider playerCol = player.GetCollider();
-	Collider enemyCol = enemy.GetCollider();
+
+
 
 	//Clock
 	sf::Clock delayShootClock;
+	sf::Clock delayEnemySpawnClock;
 	
 	//Timer
 	float delayShoot;
+	float delayEnemySpawn;
 
-	//Interator
+	//rand
+	srand(time(NULL));
+
+	//temp
+	float enemyRespawnTimeClamp=1500.0f;
 	while (window.isOpen())
 	{
 		deltaTime = clock.restart().asSeconds();
 		delayShoot = delayShootClock.getElapsedTime().asMilliseconds();
-		if (deltaTime > 1.0f / 150.0f) {
-			deltaTime = 1.0f / 150.0f;
+		delayEnemySpawn = delayEnemySpawnClock.getElapsedTime().asMilliseconds();
+		if (deltaTime > 1.0f / 400.0f) {
+			deltaTime = 1.0f / 400.0f;
 		}
 		sf::Event evnt;
 		window.draw(BG_Color);
@@ -108,28 +122,50 @@ int main()
 				break;
 			}
 		}
+		sf::Vector2f direction;
 		player.Update(&playerTexture,deltaTime);	
 		player.setGunType(1);
+		if (delayEnemySpawn > std::fmax(500.0f,std::fmax((std::fmod(rand(),enemyRespawnTimeClamp+1)),enemyRespawnTimeClamp))) {
+			int temprand = rand() % 2;
+			createEnemy(enemies, temprand, &enemyTextureG, &enemyTextureR);
+			delayEnemySpawnClock.restart();
+			if (enemyRespawnTimeClamp > 1000.0f) {
+				enemyRespawnTimeClamp-=5;
+			}
+			std::cout << enemyRespawnTimeClamp << std::endl;
+		}
 		updateBullet(bullets, deltaTime);
-		enemy.Update(&enemyTexture, deltaTime);
+		updateEnemies(enemies, deltaTime);
+		for (int i = 0;i < enemies.size();i++) {
+			if (enemies[i].getHp() <= 0 || enemies[i].GetPosition().y > 721) {
+				enemies.erase(enemies.begin() + i);
+			}
+			else {
+				Collider temp = enemies[i].GetCollider();
+				enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
+				enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
+				bulletCollisionWithEnemies(bullets, enemies[i], temp, direction);
+			}
+		}
 		if (player.isShooting() && delayShoot > player.getShootDelayTime()) {
 			bullets.push_back(Bullet(nullptr, 1, player.isFaceRight(),player.GetPosition()));
 			delayShootClock.restart();
+		}   
+		for (int i = 0;i < bullets.size();i++) {
+			Collider temp = bullets[i].GetCollider();
+			platformCollisionWithBullets(walls, bullets[i], temp, direction);
+			platformCollisionWithBullets(platforms, bullets[i], temp, direction);
 		}
-		printf("%d\n", bullets.size());
-		sf::Vector2f direction;
 
 		playerCollisionWithPlatforms(walls, player, playerCol, direction);
 		playerCollisionWithPlatforms(platforms, player, playerCol, direction);
 		playerCollisionWithPlatforms(spawns, player, playerCol, direction);
-		enemyCollisionWithPlatforms(walls, enemy, enemyCol, direction);
-		enemyCollisionWithPlatforms(platforms, enemy, enemyCol, direction);
 		drawPlatform(walls, window);
 		drawPlatform(platforms, window);
 		drawBullet(bullets, window);
+		drawEnemies(enemies, window);
 		spawns[1].Draw(window);
 		player.Draw(window);
-		enemy.Draw(window);
 		window.display();
 	}
 	return 0;
@@ -150,8 +186,21 @@ void enemyCollisionWithPlatforms(std::vector<Platform>& vect, Enemy& enemy, Coll
 		}
 	}
 }
-void platformCollisionWithBullets() {
-
+void platformCollisionWithBullets(std::vector<Platform>& vect, Bullet& bullet, Collider col, sf::Vector2f direction) {
+	for (Platform& platform : vect) {
+		if (platform.GetCollider().CheckCollision(col, direction, 1.0f)) {
+			bullet.setDestroy(true);
+			//std::cout << bullet.isDestroy() << std::endl;
+		}
+	}
+}
+void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collider col, sf::Vector2f direction) {
+	for (Bullet& bullet : vect) {
+		if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
+			bullet.setDestroy(true);
+			enemy.hitWithBullet(bullet);
+		}
+	}
 }
 void drawPlatform(std::vector<Platform>& vect,sf::RenderWindow &window) {
 	for (Platform& platform : vect)
@@ -164,6 +213,11 @@ void drawBullet(std::vector<Bullet>& vect, sf::RenderWindow& window) {
 		bullet.Draw(window);
 	}
 }
+void drawEnemies(std::vector<Enemy>& vect, sf::RenderWindow& window) {
+	for (Enemy& enemy : vect) {
+		enemy.Draw(window);
+	}
+}
 void updateBullet(std::vector<Bullet>& vect, float deltaTime) {
 	for (Bullet& bullet : vect) {
 		bullet.Update(deltaTime);
@@ -172,5 +226,25 @@ void updateBullet(std::vector<Bullet>& vect, float deltaTime) {
 		if (vect[i].isDestroy()) {
 			vect.erase(vect.begin() + i);
 		}
+	}
+}
+void updateEnemies(std::vector<Enemy>& vect, float deltaTime) {
+	for (Enemy& enemy : vect) {
+		enemy.Update(deltaTime);
+	}
+	for (int i = 0;i < vect.size();i++) {
+		if (vect[i].getHp()<=0) {
+			vect.erase(vect.begin() + i);
+		}
+	}
+}
+void createEnemy(std::vector<Enemy>& vect, int type,sf::Texture *textureG,sf::Texture *textureR) {
+	switch (type) {
+		case 0:
+			vect.push_back(Enemy(textureG, sf::Vector2u(11, 1), 0.095f, 150.0f, 1));
+			break;
+		case 1:
+			vect.push_back(Enemy(textureR, sf::Vector2u(11, 1), 0.095f, 150.0f, 1));
+			break;
 	}
 }
