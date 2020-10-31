@@ -19,6 +19,8 @@ public:
 	bool isFaceRight() { return faceRight; }
 	bool isShooting() { return shootingBool; }
 	float getShootDelayTime() { return delayShoot; }
+	float getHp() { return hp; }
+
 private:
 	sf::RectangleShape body;
 	Animation animation;
@@ -26,6 +28,7 @@ private:
 	bool  faceRight;
 	bool shootingBool;
 
+	float hp;
 	sf::Vector2f velocity;
 	bool canJump;
 	float jumpHeight;

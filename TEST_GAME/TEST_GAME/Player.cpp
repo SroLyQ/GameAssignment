@@ -11,7 +11,7 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 	canJump = true;
 	shootingBool = false;
 
-	body.setSize(sf::Vector2f(30.0f,36.0f));
+	body.setSize(sf::Vector2f(35.0f,42.0f));
 	body.setOrigin(body.getSize() / 2.0f);
 	body.setPosition(540.0f, 50.0f);
 	body.setTexture(texture);
@@ -28,7 +28,6 @@ void Player::Update(sf::Texture* texture,float deltaTime)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 		velocity.x += speed;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && canJump) {
-		std::cout << canJump << std::endl;
 		canJump = false;
 		velocity.y = -sqrtf(2.0f * 981.0f * jumpHeight);
 	}

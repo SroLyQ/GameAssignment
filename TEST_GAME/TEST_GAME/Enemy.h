@@ -15,16 +15,19 @@ public:
 	void Draw(sf::RenderWindow& window);
 	void OnCollision(sf::Vector2f direction);
 	void hitWithBullet(Bullet &bullet);
+	void spawnBox();
 
 	sf::Vector2f GetPosition() { return body.getPosition(); }
 	Collider GetCollider() { return Collider(body); }
 	bool isDead() { return isDeadBool; }
 	float getHp() { return hp; }
+	bool isSpawnBox() { return spawnBoxBool;  }
 
 private:
 	sf::RectangleShape body;
 	Animation animation;
 
+	bool spawnBoxBool;
 	bool faceRight;
 	bool isHit;
 	bool isDeadBool;

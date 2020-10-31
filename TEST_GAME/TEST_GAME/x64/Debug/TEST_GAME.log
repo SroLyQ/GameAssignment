@@ -1,5 +1,5 @@
 ﻿  main.cpp
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(100,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(107,63): warning C4244: '=': conversion from 'sf::Int32' to 'float', possible loss of data
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(108,73): warning C4244: '=': conversion from 'sf::Int32' to 'float', possible loss of data
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(105,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(112,63): warning C4244: '=': conversion from 'sf::Int32' to 'float', possible loss of data
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(113,73): warning C4244: '=': conversion from 'sf::Int32' to 'float', possible loss of data
   TEST_GAME.vcxproj -> C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\x64\Debug\TEST_GAME.exe

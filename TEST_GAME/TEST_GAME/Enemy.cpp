@@ -1,12 +1,12 @@
 #include "Enemy.h"
-
 Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type):
 	animation(texture, imageCount, switchTime)
 {
 	this->speed = speed;
+	this->isDeadBool = false ;
+	this->spawnBoxBool = false;
 	srand(time(NULL));
 	int ran=rand();
-	printf("ran = %d", ran);
 	if (ran%2 == 1) {
 		velocity.x = speed;
 		faceRight = true;
@@ -15,7 +15,6 @@ Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, fl
 		faceRight = false;
 		velocity.x = -(speed);
 	}
-	std::cout << "FaceRight "<<faceRight << std::endl;
 
 	switch (type) {
 	case 1: 
@@ -31,9 +30,23 @@ Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, fl
 Enemy::~Enemy()
 {
 }
-
+int temp=30;
 void Enemy::Update( float deltaTime)
-{	
+{
+	if (isHit == true) {
+		if (temp > 0) {
+			body.setFillColor(sf::Color(255, 0, 0));
+			temp -= 1;
+		}
+		else {
+			body.setFillColor(sf::Color(255, 255, 255));
+			isHit = false;
+			temp = 30;
+		}
+	}
+	if (this->hp <= 0) {
+		isDeadBool = true;
+	}
 	if (velocity.x < 0) {
 		faceRight = false;
 	}
@@ -74,9 +87,15 @@ void Enemy::OnCollision(sf::Vector2f direction)
 void Enemy::hitWithBullet(Bullet& bullet)
 {
 	hp-=bullet.GetDamage();
-	
-	printf("Hit");
-	if (hp <= 0) {
-		isDeadBool = true;
+	this->isHit = true;
+}
+
+void Enemy::spawnBox()
+{
+	srand(time(NULL));
+	int ran = rand();
+	switch (ran % 10) {
+		case 0:
+			this->spawnBoxBool = true;
 	}
 }
