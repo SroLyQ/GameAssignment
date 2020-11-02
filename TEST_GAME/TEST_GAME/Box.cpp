@@ -3,6 +3,8 @@
 Box::Box(sf::Texture* texture, sf::Vector2f position)
 {
 	srand(time(NULL));
+	this->hp = 50;
+	this->isDestroyBool = false;
 	body.setSize(sf::Vector2f(35.0f, 35.0f));
 	body.setOrigin(body.getSize()/2.0f);
 	body.setPosition(position);
@@ -33,6 +35,9 @@ void Box::Draw(sf::RenderWindow& window)
 void Box::Update(float deltaTime)
 {
 	velocity.y = 981.0f * deltaTime;
+	if (this->hp <= 0) {
+		this->isDestroyBool = true;
+	}
 	body.move(velocity);
 }
 
@@ -47,4 +52,10 @@ void Box::OnCollision(sf::Vector2f direction)
 	if (direction.y < 0.0f) {
 		velocity.y = 0.0f;
 	}
+}
+
+void Box::hitWithBullet(Bullet& bullet)
+{
+	this->hp -= bullet.GetDamage();
+	
 }

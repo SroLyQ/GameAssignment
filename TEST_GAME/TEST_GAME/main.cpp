@@ -7,10 +7,12 @@
 #include "Bullet.h"
 #include "Box.h"
 
+void boxCollisionWithPlatforms(std::vector<Platform>& vect, Box& box, Collider col, sf::Vector2f direction);
 void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collider col, sf::Vector2f direction);
 void platformCollisionWithBullets(std::vector<Platform>& vect, Bullet& bullet, Collider col, sf::Vector2f direction);
 void playerCollisionWithPlatforms(std::vector<Platform>& vect, Player& player, Collider col, sf::Vector2f direction);
 void enemyCollisionWithPlatforms(std::vector<Platform>& vect, Enemy& enemy, Collider col, sf::Vector2f direction);
+void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction);
 void drawPlatform(std::vector<Platform>& vect, sf::RenderWindow& window);
 void drawBullet(std::vector<Bullet>& vect, sf::RenderWindow& window);
 void drawEnemies(std::vector<Enemy>& vect, sf::RenderWindow& window);
@@ -138,19 +140,25 @@ int main()
 				enemyRespawnTimeClamp-=5;
 			}
 		}
-		updateEnemies(enemies, deltaTime, boxes, &boxTexture);
-		updateBullet(bullets, deltaTime); 
-		for (int i = 0;i < enemies.size();i++) {
-
-				Collider temp = enemies[i].GetCollider();
-				enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
-				enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
-				bulletCollisionWithEnemies(bullets, enemies[i], temp, direction);
-		}
 		if (player.isShooting() && delayShoot > player.getShootDelayTime()) {
 			bullets.push_back(Bullet(nullptr, 1, player.isFaceRight(),player.GetPosition()));
 			delayShootClock.restart();
 		}   
+		updateEnemies(enemies, deltaTime, boxes, &boxTexture);
+		updateBullet(bullets, deltaTime); 
+		updateBoxes(boxes, deltaTime);
+		for (int i = 0;i < boxes.size();i++) {
+			Collider temp = boxes[i].GetCollider();
+			bulletCollisionWithBoxes(bullets, boxes[i], temp, direction);
+			boxCollisionWithPlatforms(platforms, boxes[i], temp, direction);
+			boxCollisionWithPlatforms(walls, boxes[i], temp, direction);
+		}
+		for (int i = 0;i < enemies.size();i++) {
+			Collider temp = enemies[i].GetCollider();
+			enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
+			enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
+			bulletCollisionWithEnemies(bullets, enemies[i], temp, direction);
+		}
 		for (int i = 0;i < bullets.size();i++) {
 			Collider temp = bullets[i].GetCollider();
 			platformCollisionWithBullets(walls, bullets[i], temp, direction);
@@ -200,6 +208,21 @@ void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collide
 		if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
 			bullet.setDestroy(true);
 			enemy.hitWithBullet(bullet);
+		}
+	}
+}
+void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction) {
+	for (Bullet& bullet : vect) {
+		if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
+			bullet.setDestroy(true);
+			box.hitWithBullet(bullet);
+		}
+	}
+}
+void boxCollisionWithPlatforms(std::vector<Platform>& vect, Box& box, Collider col, sf::Vector2f direction) {
+	for (Platform& platform : vect) {
+		if (platform.GetCollider().CheckCollision(col, direction, 1.0f)) {
+			box.OnCollision(direction);
 		}
 	}
 }
@@ -253,6 +276,11 @@ void updateBoxes(std::vector<Box>& vect, float deltaTime) {
 	for (Box& box : vect) {
 		box.Update(deltaTime);
 	}
+	for (int i = 0;i < vect.size(); i++) {
+		if (vect[i].isDesttoy()) {
+			vect.erase(vect.begin() + i);
+		}
+	}
 }
 void createEnemy(std::vector<Enemy>& vect, int type,sf::Texture *textureG,sf::Texture *textureR) {
 	switch (type) {
@@ -262,12 +290,5 @@ void createEnemy(std::vector<Enemy>& vect, int type,sf::Texture *textureG,sf::Te
 		case 1:
 			vect.push_back(Enemy(textureR, sf::Vector2u(11, 1), 0.095f, 150.0f, 1));
 			break;
-	}
-}
-void boxCollisionWithPlatforms(std::vector<Platform>& vect, Box& box, Collider col, sf::Vector2f direction) {
-	for (Platform& platform : vect) {
-		if (platform.GetCollider().CheckCollision(col, direction, 1.0f)) {
-			box.OnCollision(direction);
-		}
 	}
 }

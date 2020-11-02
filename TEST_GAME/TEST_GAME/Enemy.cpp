@@ -97,5 +97,13 @@ void Enemy::spawnBox()
 	switch (ran % 10) {
 		case 0:
 			this->spawnBoxBool = true;
+		case 1:
+			this->spawnBoxBool = true;
+		case 2:
+			this->spawnBoxBool = true;
+		case 3:
+			this->spawnBoxBool = true;
+		case 4:
+			this->spawnBoxBool = true;
 	}
 }
