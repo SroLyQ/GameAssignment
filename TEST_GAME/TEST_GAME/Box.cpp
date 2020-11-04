@@ -12,13 +12,13 @@ Box::Box(sf::Texture* texture, sf::Vector2f position)
 	int ran = rand();
 	switch (ran%3) {
 		case 0: 
-			this->type = 0;
+			this->gunType = 0;
 			break;
 		case 1:
-			this->type = 1;
+			this->gunType = 1;
 			break;
 		case 2:
-			this->type = 2;
+			this->gunType = 2;
 			break;
 	}
 }
@@ -34,8 +34,10 @@ void Box::Draw(sf::RenderWindow& window)
 
 void Box::Update(float deltaTime)
 {
+	srand(time(NULL));
 	velocity.y = 981.0f * deltaTime;
 	if (this->hp <= 0) {
+		int temp = rand();
 		this->isDestroyBool = true;
 	}
 	body.move(velocity);

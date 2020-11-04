@@ -7,6 +7,7 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 {
 	this->speed = speed;
 	this->jumpHeight = jumpHeight;
+	this->gunType = 0;
 	faceRight = true;
 	canJump = true;
 	shootingBool = false;
@@ -51,9 +52,15 @@ void Player::Update(sf::Texture* texture,float deltaTime)
 		else
 			faceRight = false;
 	}
-	switch (gunType){
-		case 1:
+	switch (this->gunType){
+		case 0:
 			delayShoot = 500.0f;
+			break;
+		case 1:
+			delayShoot = 100.0f;
+			break;
+		case 2:
+			delayShoot = 1000.0f;
 			break;
 	}
 	animation.Update(deltaTime, faceRight);

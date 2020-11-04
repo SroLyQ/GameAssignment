@@ -14,6 +14,7 @@ public:
 	void OnCollision(sf::Vector2f direction);
 	void setGunType(int gunType);
 
+	int GetGunType() { return gunType; }
 	sf::Vector2f GetPosition() { return body.getPosition(); }
 	Collider GetCollider() { return Collider(body); }
 	bool isFaceRight() { return faceRight; }

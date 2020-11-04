@@ -2,6 +2,8 @@
 #include "Initial.h"
 #include "Collider.h"
 #include "Bullet.h"
+#include "Gun.h"
+
 class Box
 {
 public:
@@ -13,6 +15,7 @@ public:
 	void OnCollision(sf::Vector2f direction);
 	void hitWithBullet(Bullet& bullet);
 
+	int GetGunType() { return gunType; }
 	bool isDesttoy() { return isDestroyBool; }
 	Collider GetCollider() { return Collider(body); }
 	sf::Vector2f GetPosition() { return body.getPosition(); }
@@ -23,6 +26,6 @@ private:
 	bool isDestroyBool;
 	sf::Vector2f velocity;
 	float hp;
-	int type;
+	int gunType;
 };
 
