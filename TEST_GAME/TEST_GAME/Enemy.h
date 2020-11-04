@@ -27,10 +27,12 @@ private:
 	sf::RectangleShape body;
 	Animation animation;
 
+	int typeOfBullet;
 	bool spawnBoxBool;
 	bool faceRight;
 	bool isHit;
 	bool isDeadBool;
+	bool isOnGround;
 	float speed;
 	float hp;
 	float delayTime;

@@ -12,6 +12,7 @@ public:
 	void Update(float deltaTime);
 	void setDestroy(bool isDestroy);
 
+	int GetType() { return type; }
 	Collider GetCollider() { return Collider(body); }
 	bool isDestroy() { return isDestroyBool; }
 	float GetDamage() { return damage; }
@@ -22,6 +23,7 @@ private:
 	sf::Vector2f velocity;
 	bool faceRight;
 	float speed;
+	int type;
 	bool isDestroyBool;
 	float damage;
 };

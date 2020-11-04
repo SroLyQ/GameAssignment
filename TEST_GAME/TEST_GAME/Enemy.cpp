@@ -31,19 +31,10 @@ Enemy::~Enemy()
 {
 }
 int temp=30;
+float tempSpeed;
 void Enemy::Update( float deltaTime)
 {
-	if (isHit == true) {
-		if (temp > 0) {
-			body.setFillColor(sf::Color(255, 0, 0));
-			temp -= 1;
-		}
-		else {
-			body.setFillColor(sf::Color(255, 255, 255));
-			isHit = false;
-			temp = 30;
-		}
-	}
+	isOnGround = false;
 	if (this->hp <= 0) {
 		isDeadBool = true;
 	}
@@ -57,9 +48,45 @@ void Enemy::Update( float deltaTime)
 	if (velocity.y > 10000) {
 		velocity.y = 981.0f;
 	}
-	animation.Update(deltaTime, faceRight);
-	body.setTextureRect(animation.uvRect);
-	body.move(velocity*deltaTime);
+	if (isHit == true) {
+		if (velocity.x != 0.0f) {
+			tempSpeed = velocity.x;
+		}
+		if (temp > 0) {
+			body.setFillColor(sf::Color(255, 0, 0));
+			temp -= 1;
+		}
+		else {
+			body.setFillColor(sf::Color(255, 255, 255));
+			isHit = false;
+			temp = 30;
+		}
+		if (isOnGround) {
+			switch (typeOfBullet) {
+				case 0:
+					if (temp > 0) {
+						velocity.x = 0.0f;
+					}
+					else {
+						velocity.x = tempSpeed;
+					}
+				case 1:
+					body.move(-velocity * deltaTime);
+					animation.Update(deltaTime, faceRight);
+					body.setTextureRect(animation.uvRect);
+				case 2:
+					body.move(-velocity*1.50f* deltaTime);
+					animation.Update(deltaTime, faceRight);
+					body.setTextureRect(animation.uvRect);
+			}
+
+		}
+	}
+	else {
+		animation.Update(deltaTime, faceRight);
+		body.setTextureRect(animation.uvRect);
+		body.move(velocity * deltaTime);
+	}
 }
 
 void Enemy::Draw(sf::RenderWindow& window)
@@ -79,6 +106,7 @@ void Enemy::OnCollision(sf::Vector2f direction)
 	}
 	if (direction.y < 0.0f) {
 		velocity.y = 0.0f;
+		isOnGround = true;
 	}
 
 	//std::cout << velocity.x << " " << velocity.y << std::endl;
@@ -87,6 +115,7 @@ void Enemy::OnCollision(sf::Vector2f direction)
 void Enemy::hitWithBullet(Bullet& bullet)
 {
 	hp-=bullet.GetDamage();
+	this->typeOfBullet = bullet.GetType();
 	this->isHit = true;
 }
 
@@ -94,16 +123,13 @@ void Enemy::spawnBox()
 {
 	srand(time(NULL));
 	int ran = rand();
-	switch (ran % 10) {
+	switch (ran % 20) {
 		case 0:
-			this->spawnBoxBool = true;
-		case 1:
-			this->spawnBoxBool = true;
-		case 2:
-			this->spawnBoxBool = true;
-		case 3:
-			this->spawnBoxBool = true;
+		case 5:
 		case 4:
+		case 6:
+		case 11:
 			this->spawnBoxBool = true;
+			break;
 	}
 }

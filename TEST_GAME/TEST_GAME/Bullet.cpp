@@ -1,17 +1,33 @@
 #include "bullet.h"
 
-Bullet::Bullet(sf::Texture *texture,int type, bool faceRight,sf::Vector2f position)
+Bullet::Bullet(sf::Texture* texture, int type, bool faceRight, sf::Vector2f position)
 {
-	if (type == 1) {
+	this->isDestroyBool = false;
+	this->type = type;
+	switch (type) {
+	case 0:
 		this->speed = 400.0f;
 		this->faceRight = faceRight;
-		isDestroyBool = false;
 		this->damage = 50.0f;
-		body.setSize(sf::Vector2f(10.0f, 10.0f));
-		body.setOrigin(body.getSize() / 2.0f);
-		body.setPosition(position);
-		body.setTexture(texture);
+		break;
+	case 1:
+		this->speed = 450.0f;
+		this->faceRight = faceRight;
+		this->damage = 20.0f;
+		break;
+	case 2:
+		this->speed = 500.0f;
+		this->faceRight = faceRight;
+		this->damage = 150.0f;
+		break;
 	}
+	body.setSize(sf::Vector2f(10.0f, 10.0f));
+	body.setOrigin(body.getSize() / 2.0f);
+	if (faceRight)
+		body.setPosition(position.x+10.0f,position.y);
+	else
+		body.setPosition(position.x - 10.0f, position.y);
+	body.setTexture(texture);
 }
 
 Bullet::~Bullet()

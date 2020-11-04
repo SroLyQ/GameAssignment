@@ -46,14 +46,16 @@ int main()
 	sf::Texture enemyTextureG;
 	sf::Texture enemyTextureR;
 	sf::Texture boxTexture;
-	std::vector<sf::Texture*> gunTex;
-	sf::Texture tempTex;
-	tempTex.loadFromFile("./Sprite/Object/Guns/0.png");
-	gunTex.push_back(&tempTex);
-	tempTex.loadFromFile("./Sprite/Object/Guns/0.png");
-	gunTex.push_back(&tempTex);
-	tempTex.loadFromFile("./Sprite/Object/Guns/0.png");
-	gunTex.push_back(&tempTex);
+	sf::Texture gunTexture0;
+	sf::Texture gunTexture1;
+	sf::Texture gunTexture2;
+	std::vector<sf::Texture*> gunTexture;
+	gunTexture0.loadFromFile("./Sprite/Object/Guns/0.png");
+	gunTexture.push_back(&gunTexture0);
+	gunTexture1.loadFromFile("./Sprite/Object/Guns/1.png");
+	gunTexture.push_back(&gunTexture1);
+	gunTexture2.loadFromFile("./Sprite/Object/Guns/2.png");
+	gunTexture.push_back(&gunTexture2);
 	if (!boxTexture.loadFromFile("Sprite/Object/Crate.png")) printf("Load File Error");
 	if (!playerTexture.loadFromFile("Sprite/Player/Animation_Idle_R.png")) printf("Load File Error");
 	BG_ColorTexture.loadFromFile("Sprite/Background/BG_Color.png");
@@ -151,12 +153,12 @@ int main()
 			}
 		}
 		if (player.isShooting() && delayShoot > player.getShootDelayTime()) {
-			bullets.push_back(Bullet(nullptr, 1, player.isFaceRight(),player.GetPosition()));
+			bullets.push_back(Bullet(nullptr, player.GetGunType(), player.isFaceRight(),player.GetPosition()));
 			delayShootClock.restart();
 		}   
 		updateEnemies(enemies, deltaTime, boxes, &boxTexture);
 		updateBullet(bullets, deltaTime); 
-		updateBoxes(boxes, deltaTime,guns,gunTex);
+		updateBoxes(boxes, deltaTime,guns,gunTexture);
 		updateGuns(guns, deltaTime);
 		for (int i = 0;i < boxes.size();i++) {
 			Collider temp = boxes[i].GetCollider();
