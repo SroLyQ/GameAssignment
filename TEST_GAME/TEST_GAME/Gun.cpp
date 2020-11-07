@@ -14,7 +14,7 @@ Gun::Gun(int type,Collider col, std::vector<sf::Texture*> vectTexture)
 			break;
 		case 1:
 			body.setTexture(vectTexture[1]);
-			body.setSize(sf::Vector2f( 24.0f,16.0f));
+			body.setSize(sf::Vector2f( 30.0f,16.0f));
 			body.setOrigin(body.getSize() / 2.0f);
 			body.setPosition(col.GetPosition());
 			break;

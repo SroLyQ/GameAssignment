@@ -2,6 +2,7 @@
 Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type):
 	animation(texture, imageCount, switchTime)
 {
+	this->isAlreadySpawnBoxBool = false;
 	this->speed = speed;
 	this->isDeadBool = false ;
 	this->spawnBoxBool = false;
@@ -37,6 +38,7 @@ void Enemy::Update( float deltaTime)
 	isOnGround = false;
 	if (this->hp <= 0) {
 		isDeadBool = true;
+
 	}
 	if (velocity.x < 0) {
 		faceRight = false;
@@ -82,9 +84,23 @@ void Enemy::Update( float deltaTime)
 
 		}
 	}
-	else {
+	else if(!isDeadBool){
 		animation.Update(deltaTime, faceRight);
 		body.setTextureRect(animation.uvRect);
+		body.move(velocity * deltaTime);
+	}
+	else if (!isDeadBool && !isHit) {
+		body.setTextureRect(animation.uvRect);
+		body.move(velocity * deltaTime);
+	}
+	else if (isDeadBool) {
+		velocity.x = 0.0f;
+		if (faceRight) {
+			body.rotate(-45.0f);
+		}
+		else {
+			body.rotate(45.0f);
+		}
 		body.move(velocity * deltaTime);
 	}
 }
@@ -132,4 +148,9 @@ void Enemy::spawnBox()
 			this->spawnBoxBool = true;
 			break;
 	}
+}
+
+void Enemy::alreadySpawnBox(bool isAlreadySpawnBoxBool)
+{
+	this->isAlreadySpawnBoxBool = isAlreadySpawnBoxBool;
 }

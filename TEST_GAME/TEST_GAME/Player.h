@@ -13,6 +13,7 @@ public:
 	void Draw(sf::RenderWindow& window);
 	void OnCollision(sf::Vector2f direction);
 	void setGunType(int gunType);
+	void setGunTexture(sf::Texture* texture);
 
 	int GetGunType() { return gunType; }
 	sf::Vector2f GetPosition() { return body.getPosition(); }
@@ -24,6 +25,8 @@ public:
 
 private:
 	sf::RectangleShape body;
+	sf::Texture gunTexture;
+	sf::RectangleShape gunTextureRec;
 	Animation animation;
 	float speed;
 	bool  faceRight;

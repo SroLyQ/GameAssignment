@@ -16,7 +16,9 @@ public:
 	void OnCollision(sf::Vector2f direction);
 	void hitWithBullet(Bullet &bullet);
 	void spawnBox();
+	void alreadySpawnBox(bool isAlreadySpawnBoxBool);
 
+	bool isAlreadySpawnBox(){ return isAlreadySpawnBoxBool; }
 	sf::Vector2f GetPosition() { return body.getPosition(); }
 	Collider GetCollider() { return Collider(body); }
 	bool isDead() { return isDeadBool; }
@@ -29,6 +31,7 @@ private:
 
 	int typeOfBullet;
 	bool spawnBoxBool;
+	bool isAlreadySpawnBoxBool;
 	bool faceRight;
 	bool isHit;
 	bool isDeadBool;

@@ -50,7 +50,7 @@ int main()
 	sf::Texture gunTexture1;
 	sf::Texture gunTexture2;
 	std::vector<sf::Texture*> gunTexture;
-	gunTexture0.loadFromFile("./Sprite/Object/Guns/0.png");
+	gunTexture0.loadFromFile("./Sprite/Object/Guns/0_R.png");
 	gunTexture.push_back(&gunTexture0);
 	gunTexture1.loadFromFile("./Sprite/Object/Guns/1.png");
 	gunTexture.push_back(&gunTexture1);
@@ -126,8 +126,8 @@ int main()
 		deltaTime = clock.restart().asSeconds();
 		delayShoot = delayShootClock.getElapsedTime().asMilliseconds();
 		delayEnemySpawn = delayEnemySpawnClock.getElapsedTime().asMilliseconds();
-		if (deltaTime > 1.0f / 400.0f) {
-			deltaTime = 1.0f / 400.0f;
+		if (deltaTime > 1.0f / 60.0f) {
+			deltaTime = 1.0f / 60.0f;
 		}
 		sf::Event evnt;
 		window.draw(BG_Color);
@@ -167,10 +167,12 @@ int main()
 			boxCollisionWithPlatforms(walls, boxes[i], temp, direction);
 		}
 		for (int i = 0;i < enemies.size();i++) {
-			Collider temp = enemies[i].GetCollider();
-			enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
-			enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
-			bulletCollisionWithEnemies(bullets, enemies[i], temp, direction);
+			if (!enemies[i].isDead()) {
+				Collider temp = enemies[i].GetCollider();
+				enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
+				enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
+				bulletCollisionWithEnemies(bullets, enemies[i], temp, direction);
+			}
 		}
 		for (int i = 0;i < bullets.size();i++) {
 			Collider temp = bullets[i].GetCollider();
@@ -291,10 +293,15 @@ void updateEnemies(std::vector<Enemy>& vect, float deltaTime, std::vector<Box> &
 	}
 	for (int i = 0;i < vect.size();i++) {
 		if (vect[i].getHp()<=0) {
-			vect[i].spawnBox();
-			if (vect[i].isSpawnBox()) {
-				vectBox.push_back(Box(texture , vect[i].GetPosition()));
+			if (!vect[i].isAlreadySpawnBox()) {
+				vect[i].spawnBox();
+				if (vect[i].isSpawnBox()) {
+					vectBox.push_back(Box(texture, vect[i].GetPosition()));
+				}
+				vect[i].alreadySpawnBox(true);
 			}
+		}
+		if (vect[i].GetPosition().y >= 720) {
 			vect.erase(vect.begin() + i);
 		}
 	}

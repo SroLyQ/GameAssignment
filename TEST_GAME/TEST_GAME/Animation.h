@@ -7,7 +7,7 @@ public:
 	~Animation();
 
 	void Update(float deltaTime,bool faceRight);
-public:
+
 	sf::IntRect uvRect;
 private:
 	sf::Vector2u imageCount;
