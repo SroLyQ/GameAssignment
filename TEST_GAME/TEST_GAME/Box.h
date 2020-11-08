@@ -7,7 +7,7 @@
 class Box
 {
 public:
-	Box(sf::Texture* texture,sf::Vector2f position);
+	Box(sf::Texture* texture,sf::Vector2f position,int gunType);
 	~Box();
 
 	void Draw(sf::RenderWindow& window);

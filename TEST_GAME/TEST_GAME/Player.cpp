@@ -2,12 +2,15 @@
 #include "Animation.h"
 #include "bullet.h"
 #include "Initial.h"
+#include <math.h>
 Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,float jumpHeight):
 	animation(texture,imageCount,switchTime)
 {
 	this->speed = speed;
 	this->jumpHeight = jumpHeight;
 	this->gunType = 0;
+	this->gunType1ClockFloat = 0.0f;
+	this->gunType2ClockFloat = 0.0f;
 	gunTexture.loadFromFile("./Sprite/Object/Guns/0_R.png");
 	faceRight = true;
 	canJump = true;
@@ -18,16 +21,54 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 	body.setTexture(texture);
 	gunTextureRec.setSize(sf::Vector2f(20.0f, 10.0f));
 	gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
-	gunTextureRec.setPosition(body.getPosition().x + 15.0f, body.getPosition().y);
+	gunTextureRec.setPosition(body.getPosition().x + 20.0f, body.getPosition().y);
 	setGunTexture(&gunTexture);
 }
 Player::~Player()
 {
 }
-void Player::Update(sf::Texture* texture, float deltaTime)
+void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Texture*> gunTexture_R)
 {
 	shootingBool = false;
 	velocity.x = 0.0f;
+	switch (this->gunType) {
+		case 0:
+			gunTextureRec.setSize(sf::Vector2f(20.0f, 10.0f));
+			gunType1Clock.restart();
+			gunType2Clock.restart();
+			break;
+		case 1:
+			gunTextureRec.setSize(sf::Vector2f(30.0f, 16.0f));
+			gunType1ClockFloat = gunType1Clock.getElapsedTime().asSeconds();
+			gunType2Clock.restart();
+			break;
+		case 2:
+			gunTextureRec.setSize(sf::Vector2f(24.0f, 12.0f));
+			gunType2ClockFloat = gunType2Clock.getElapsedTime().asSeconds();
+			gunType1Clock.restart();
+			break;
+	}
+	if (gunType1ClockFloat > 10.0f) {
+		this->gunType = 0;
+		gunType1Clock.restart();
+		gunType1ClockFloat = 0.0f;
+	}
+	else if (gunType2ClockFloat > 15.0f) {
+		this->gunType = 0;
+		gunType2Clock.restart();
+		gunType2ClockFloat = 0.0f;
+	}
+	gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
+	if (faceRight) {
+		this->gunTextureRec.setTexture(gunTexture_R[this->gunType]);
+		this->gunTextureRec.setTextureRect(sf::IntRect(0, 0, abs(gunTexture_R[this->gunType]->getSize().x/1.0f), gunTexture_R[this->gunType]->getSize().y));
+		gunTextureRec.setPosition(body.getPosition().x + 20.0f, body.getPosition().y);
+	}
+	else if (!faceRight) {
+		this->gunTextureRec.setTexture(gunTexture_R[this->gunType]);
+		this->gunTextureRec.setTextureRect(sf::IntRect(gunTexture_R[this->gunType]->getSize().x , 0, -abs(gunTexture_R[this->gunType]->getSize().x / 1.0f), gunTexture_R[this->gunType]->getSize().y));
+		gunTextureRec.setPosition(body.getPosition().x - 20.0f, body.getPosition().y);
+	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 		velocity.x -= speed;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
@@ -70,52 +111,6 @@ void Player::Update(sf::Texture* texture, float deltaTime)
 	animation.Update(deltaTime, faceRight);
 	body.setTextureRect(animation.uvRect);
 	body.move(velocity * deltaTime);
-	if (faceRight) {
-		switch (this->gunType) {
-			case 0:
-				gunTexture.loadFromFile("./Sprite/Object/Guns/0_R.png");
-				gunTextureRec.setSize(sf::Vector2f(20.0f, 10.0f));
-				gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
-				gunTextureRec.setTexture(&gunTexture);
-				break;
-			case 1:
-				gunTexture.loadFromFile("./Sprite/Object/Guns/1.png");
-				gunTextureRec.setSize(sf::Vector2f(30.0f, 16.0f));
-				gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
-				gunTextureRec.setTexture(&gunTexture);
-				break;
-			case 2:
-				gunTexture.loadFromFile("./Sprite/Object/Guns/2.png");
-				gunTextureRec.setSize(sf::Vector2f(24.0f, 12.0f));
-				gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
-				gunTextureRec.setTexture(&gunTexture);
-				break;
-		}
-		gunTextureRec.setPosition(body.getPosition().x + 15.0f, body.getPosition().y+5.0f);
-	}
-	else if (!faceRight) {
-		switch (this->gunType) {
-		case 0:
-			gunTexture.loadFromFile("./Sprite/Object/Guns/0_L.png");
-			gunTextureRec.setSize(sf::Vector2f(20.0f, 10.0f));
-			gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
-			gunTextureRec.setTexture(&gunTexture);
-			break;
-		case 1:
-			gunTexture.loadFromFile("./Sprite/Object/Guns/1.png");
-			gunTextureRec.setSize(sf::Vector2f(24.0f, 16.0f));
-			gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
-			gunTextureRec.setTexture(&gunTexture);
-			break;
-		case 2:
-			gunTexture.loadFromFile("./Sprite/Object/Guns/2.png");
-			gunTextureRec.setSize(sf::Vector2f(24.0f, 12.0f));
-			gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
-			gunTextureRec.setTexture(&gunTexture);
-			break;
-		}
-		gunTextureRec.setPosition(body.getPosition().x - 15.0f, body.getPosition().y+5.0f);
-	}
 }
 
 void Player::Draw(sf::RenderWindow& window)

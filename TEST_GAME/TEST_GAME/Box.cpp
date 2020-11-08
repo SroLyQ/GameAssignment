@@ -1,16 +1,15 @@
 #include "Box.h"
 
-Box::Box(sf::Texture* texture, sf::Vector2f position)
+Box::Box(sf::Texture* texture, sf::Vector2f position,int gunType)
 {
-	srand(time(NULL));
 	this->hp = 50;
+	this->gunType = gunType;
 	this->isDestroyBool = false;
 	body.setSize(sf::Vector2f(35.0f, 35.0f));
 	body.setOrigin(body.getSize()/2.0f);
 	body.setPosition(position);
 	body.setTexture(texture);
-	int ran = rand();
-	switch (ran%3) {
+	switch (gunType%3) {
 		case 0: 
 			this->gunType = 0;
 			break;

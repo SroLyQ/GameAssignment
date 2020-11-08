@@ -8,7 +8,7 @@ public:
 
 	void Draw(sf::RenderWindow& window);
 	void setPickUp(bool isPickUp);
-	
+
 	bool isPickUp() { return isPickUpBool; }
 	int GetGunType() { return type; }
 	Collider GetCollider() { return Collider(body); }

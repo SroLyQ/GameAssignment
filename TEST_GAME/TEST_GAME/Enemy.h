@@ -8,7 +8,7 @@
 class Enemy
 {
 public:
-	Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type);
+	Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type,int spawnBoxInt);
 	~Enemy();
 
 	void Update( float deltaTime);
@@ -18,6 +18,7 @@ public:
 	void spawnBox();
 	void alreadySpawnBox(bool isAlreadySpawnBoxBool);
 
+	int getSpawnBoxInt() { return spawnBoxInt; }
 	bool isAlreadySpawnBox(){ return isAlreadySpawnBoxBool; }
 	sf::Vector2f GetPosition() { return body.getPosition(); }
 	Collider GetCollider() { return Collider(body); }
@@ -29,6 +30,7 @@ private:
 	sf::RectangleShape body;
 	Animation animation;
 
+	int spawnBoxInt;
 	int typeOfBullet;
 	bool spawnBoxBool;
 	bool isAlreadySpawnBoxBool;

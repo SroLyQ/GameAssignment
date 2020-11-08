@@ -1,11 +1,12 @@
 #include "Enemy.h"
-Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type):
+Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type,int spawnBoxInt):
 	animation(texture, imageCount, switchTime)
 {
 	this->isAlreadySpawnBoxBool = false;
 	this->speed = speed;
 	this->isDeadBool = false ;
 	this->spawnBoxBool = false;
+	this->spawnBoxInt = spawnBoxInt;
 	srand(time(NULL));
 	int ran=rand();
 	if (ran%2 == 1) {
@@ -137,9 +138,7 @@ void Enemy::hitWithBullet(Bullet& bullet)
 
 void Enemy::spawnBox()
 {
-	srand(time(NULL));
-	int ran = rand();
-	switch (ran % 20) {
+	switch (this->spawnBoxInt % 20) {
 		case 0:
 		case 5:
 		case 4:

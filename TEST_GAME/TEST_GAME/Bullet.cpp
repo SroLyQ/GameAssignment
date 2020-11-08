@@ -21,7 +21,7 @@ Bullet::Bullet(sf::Texture* texture, int type, bool faceRight, sf::Vector2f posi
 		this->damage = 150.0f;
 		break;
 	}
-	body.setSize(sf::Vector2f(10.0f, 10.0f));
+	body.setSize(sf::Vector2f(8.0f, 8.0f));
 	body.setOrigin(body.getSize() / 2.0f);
 	if (faceRight)
 		body.setPosition(position.x+10.0f,position.y);

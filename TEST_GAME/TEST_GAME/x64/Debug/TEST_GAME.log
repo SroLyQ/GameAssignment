@@ -1,15 +1,12 @@
-﻿  Box.cpp
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\Box.cpp(5,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\Box.cpp(37,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  Bullet.cpp
-  Enemy.cpp
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\Enemy.cpp(9,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\Enemy.cpp(140,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  Player.cpp
-  main.cpp
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(120,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(127,63): warning C4244: '=': conversion from 'sf::Int32' to 'float', possible loss of data
-C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(128,73): warning C4244: '=': conversion from 'sf::Int32' to 'float', possible loss of data
-  Generating Code...
-  LINK : C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\x64\Debug\TEST_GAME.exe not found or not built by the last incremental link; performing full link
+﻿  Player.cpp
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\Player.cpp(64,59): warning C4244: 'argument': conversion from 'float' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\Player.cpp(69,96): warning C4244: 'argument': conversion from 'float' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
   TEST_GAME.vcxproj -> C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\x64\Debug\TEST_GAME.exe

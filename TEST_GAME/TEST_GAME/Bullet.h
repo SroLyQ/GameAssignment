@@ -19,6 +19,7 @@ public:
 
 private:
 	sf::RectangleShape body;
+	sf::RectangleShape textureRec;
 
 	sf::Vector2f velocity;
 	bool faceRight;
