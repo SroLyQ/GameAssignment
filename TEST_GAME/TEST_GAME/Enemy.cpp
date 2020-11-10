@@ -1,15 +1,23 @@
 #include "Enemy.h"
-Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed,int type,int spawnBoxInt):
+Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount,sf::Vector2f position,float switchTime,int type,int randomInt):
 	animation(texture, imageCount, switchTime)
 {
 	this->isAlreadySpawnBoxBool = false;
-	this->speed = speed;
+	switch (randomInt%3) {
+		case 0:
+			this->speed = 140.0f;
+			break;
+		case 1:
+			this->speed = 145.0f;
+			break;
+		case 2:
+			this->speed = 150.0f;
+			break;
+	}
 	this->isDeadBool = false ;
 	this->spawnBoxBool = false;
-	this->spawnBoxInt = spawnBoxInt;
-	srand(time(NULL));
-	int ran=rand();
-	if (ran%2 == 1) {
+	this->randomInt = randomInt;
+	if (randomInt%2 == 1) {
 		velocity.x = speed;
 		faceRight = true;
 	}
@@ -17,15 +25,21 @@ Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, fl
 		faceRight = false;
 		velocity.x = -(speed);
 	}
-
 	switch (type) {
-	case 1: 
-		this->hp=150.0f;
-		body.setSize(sf::Vector2f(30.0f, 36.0f));
-		body.setOrigin(body.getSize() / 2.0f);
-		body.setPosition(540.0f, 0.0f);
-		body.setTexture(texture);
-		break;  
+	case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+			this->hp=150.0f;
+			body.setSize(sf::Vector2f(30.0f, 36.0f));
+			body.setOrigin(body.getSize() / 2.0f);
+			body.setPosition(position);
+			body.setTexture(texture);
+			break;  
+		case 2: 
+			this->hp = 450.0f;
+			this->speed = 115.0f;
+			body.setSize(sf::Vector2f(54.0f, 64.8f));
+			body.setOrigin(body.getSize() / 2.0f);
+			body.setPosition(position);
+			body.setTexture(texture);
 	}
 }
 
@@ -138,12 +152,14 @@ void Enemy::hitWithBullet(Bullet& bullet)
 
 void Enemy::spawnBox()
 {
-	switch (this->spawnBoxInt % 20) {
+	switch (this->randomInt % 18) {
 		case 0:
 		case 5:
 		case 4:
 		case 6:
 		case 11:
+		case 12:
+		case 16:
 			this->spawnBoxBool = true;
 			break;
 	}

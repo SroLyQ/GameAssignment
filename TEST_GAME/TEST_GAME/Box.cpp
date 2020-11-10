@@ -33,10 +33,8 @@ void Box::Draw(sf::RenderWindow& window)
 
 void Box::Update(float deltaTime)
 {
-	srand(time(NULL));
 	velocity.y = 981.0f * deltaTime;
 	if (this->hp <= 0) {
-		int temp = rand();
 		this->isDestroyBool = true;
 	}
 	body.move(velocity);

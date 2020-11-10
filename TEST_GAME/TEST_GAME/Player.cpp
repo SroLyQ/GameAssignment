@@ -11,6 +11,8 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 	this->gunType = 0;
 	this->gunType1ClockFloat = 0.0f;
 	this->gunType2ClockFloat = 0.0f;
+	this->restartClock = false;
+
 	gunTexture.loadFromFile("./Sprite/Object/Guns/0_R.png");
 	faceRight = true;
 	canJump = true;
@@ -48,12 +50,17 @@ void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Textu
 			gunType1Clock.restart();
 			break;
 	}
-	if (gunType1ClockFloat > 10.0f) {
+	if (restartClock) {
+		gunType1Clock.restart();
+		gunType2Clock.restart();
+		restartClock = false;
+	}
+	if (gunType1ClockFloat > 8.0f) {
 		this->gunType = 0;
 		gunType1Clock.restart();
 		gunType1ClockFloat = 0.0f;
 	}
-	else if (gunType2ClockFloat > 15.0f) {
+	else if (gunType2ClockFloat > 9.0f) {
 		this->gunType = 0;
 		gunType2Clock.restart();
 		gunType2ClockFloat = 0.0f;
@@ -98,15 +105,15 @@ void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Textu
 			faceRight = false;
 	}
 	switch (this->gunType) {
-	case 0:
-		delayShoot = 500.0f;
-		break;
-	case 1:
-		delayShoot = 100.0f;
-		break;
-	case 2:
-		delayShoot = 1000.0f;
-		break;
+		case 0:
+			delayShoot = 500.0f;
+			break;
+		case 1:
+			delayShoot = 100.0f;
+			break;
+		case 2:
+			delayShoot = 700.0f;
+			break;
 	}
 	animation.Update(deltaTime, faceRight);
 	body.setTextureRect(animation.uvRect);
@@ -138,7 +145,10 @@ void Player::OnCollision(sf::Vector2f direction)
 
 void Player::setGunType(int gunType)
 {
-	this->gunType = gunType;
+	if (this->gunType != gunType) {
+		this->gunType = gunType;
+	}
+	else this->restartClock = true;
 }
 
 void Player::setGunTexture(sf::Texture* texture)

@@ -4,7 +4,9 @@ Gun::Gun(int type,Collider col, std::vector<sf::Texture*> vectTexture)
 {
 	this->isPickUpBool = false;
 	this->type = type;
-
+	this->moveUp = false;
+	this->speed = 4.0f;
+	this->isDestroyBool = false;
 	switch (type) {
 		case 0:
 			body.setTexture(vectTexture[0]);
@@ -25,8 +27,29 @@ Gun::Gun(int type,Collider col, std::vector<sf::Texture*> vectTexture)
 			body.setPosition(col.GetPosition());
 			break;
 	}
+	this->startPosition = body.getPosition();
 }
+void Gun::Update(float deltaTime)
+{
+	this->timeAlive = clockAlive.getElapsedTime().asSeconds();
+	if (this->timeAlive > 10.0f) {
+		isDestroyBool = true;
+	}
+	if (body.getPosition().y < this->startPosition.y - 8.0f && moveUp) {
+		moveUp = false;
+	}
+	if (body.getPosition().y > this->startPosition.y + 8.0f && !moveUp) {
+		moveUp = true;
+	}
+	if (moveUp) {
+		body.move(0, -speed * deltaTime);
+	}
+	else {
+		body.move(0, speed * deltaTime);
+	}
 
+
+}
 void Gun::Draw(sf::RenderWindow& window)
 {
 	window.draw(body);

@@ -36,6 +36,7 @@ private:
 	float gunType1ClockFloat;
 	float gunType2ClockFloat;
 	float speed;
+	bool restartClock;
 	bool  faceRight;
 	bool shootingBool;
 	float hp;

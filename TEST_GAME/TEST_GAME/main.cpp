@@ -20,7 +20,7 @@ void drawBullet(std::vector<Bullet>& vect, sf::RenderWindow& window);
 void drawEnemies(std::vector<Enemy>& vect, sf::RenderWindow& window);
 void updateBullet(std::vector<Bullet>& vect, float deltaTime);
 void updateEnemies(std::vector<Enemy>& vect, float deltaTime, std::vector<Box>& vectBox, sf::Texture* texture);
-void createEnemy(std::vector<Enemy>& vect, int type, sf::Texture* textureG, sf::Texture* textureR);
+void createEnemy(std::vector<Enemy>& vect, int type, std::vector<sf::Texture*> texture);
 void drawBoxes(std::vector<Box>& vect, sf::RenderWindow& window);
 void updateBoxes(std::vector<Box>& vect, float deltaTime, std::vector<Gun>& gunVect, std::vector<sf::Texture*> gunTexture);
 void drawGuns(std::vector<Gun>& vect, sf::RenderWindow& window);
@@ -29,7 +29,12 @@ void updateGuns(std::vector<Gun>& vect, float deltaTime);
 int main()
 {
 	srand(time(NULL));
-
+	int salt1 = rand();
+	srand(salt1);
+	int salt2 = rand();
+	srand(salt2);
+	int salt3 = rand();
+	srand(salt3);
 	std::vector<Box> boxes;
 	std::vector<Platform> platforms;
 	std::vector<Platform> walls;
@@ -37,6 +42,7 @@ int main()
 	std::vector<Enemy> enemies;
 	std::vector<Bullet> bullets;
 	std::vector<Gun> guns;
+	std::vector<sf::Texture*> gunTexture_R,enemyTexture;
 	/// Texture ///
 	sf::Texture playerTexture;
 	sf::Texture BG_ColorTexture;
@@ -45,28 +51,29 @@ int main()
 	sf::Texture Floor1;
 	sf::Texture Platform1;
 	sf::Texture spawnTop;
-	sf::Texture enemyTextureG;
-	sf::Texture enemyTextureR;
+	sf::Texture enemyTexture1;
+	sf::Texture enemyTexture2;
 	sf::Texture boxTexture;
 	sf::Texture gunTexture0;
 	sf::Texture gunTexture1;
 	sf::Texture gunTexture2;
 	sf::Texture bulletTexture;
-	std::vector<sf::Texture*> gunTexture_R;
 	gunTexture0.loadFromFile("./Sprite/Object/Guns/0_R.png");
-	gunTexture_R.push_back(&gunTexture0);
 	gunTexture1.loadFromFile("./Sprite/Object/Guns/1.png");
-	gunTexture_R.push_back(&gunTexture1);
 	gunTexture2.loadFromFile("./Sprite/Object/Guns/2.png");
-	gunTexture_R.push_back(&gunTexture2);
 	bulletTexture.loadFromFile("./Sprite/Object/Bullet.png");
 	if (!boxTexture.loadFromFile("Sprite/Object/Crate.png")) printf("Load File Error");
 	if (!playerTexture.loadFromFile("Sprite/Player/Animation_Idle_R.png")) printf("Load File Error");
 	BG_ColorTexture.loadFromFile("Sprite/Background/BG_Color.png");
 	BG_BuildingTexture.loadFromFile("Sprite/Background/Buildings.png");
-	if (!enemyTextureG.loadFromFile("Sprite/Monster/Animation_Walk_Monster1.png")) printf("Load File Error");
-	if (!enemyTextureR.loadFromFile("Sprite/Monster/Animation_Walk_Monster1.png")) printf("Load File Error");
+	if (!enemyTexture1.loadFromFile("Sprite/Monster/Animation_Walk_Monster1.png")) printf("Load File Error");
+	if (!enemyTexture2.loadFromFile("Sprite/Monster/Animation_Walk_Monster2.png")) printf("Load File Error");
 
+	gunTexture_R.push_back(&gunTexture0);
+	gunTexture_R.push_back(&gunTexture1);
+	gunTexture_R.push_back(&gunTexture2);
+	enemyTexture.push_back(&enemyTexture1);
+	enemyTexture.push_back(&enemyTexture2);
 	/// Window ///
 	sf::RenderWindow window(sf::VideoMode(1080, 720), "TEST_GAME", sf::Style::Close | sf::Style::Resize);
 	//variable
@@ -145,9 +152,9 @@ int main()
 		}
 		sf::Vector2f direction;
 		player.Update(&playerTexture,deltaTime, gunTexture_R);
-		if (delayEnemySpawn > std::fmax(500.0f,std::fmax((std::fmod(rand(),enemyRespawnTimeClamp+1)),enemyRespawnTimeClamp))) {
+		if (delayEnemySpawn > std::fmax(1000.0f,std::fmax((std::fmod(rand(),enemyRespawnTimeClamp+1)),enemyRespawnTimeClamp))) {
 			int temprand = rand() % 2;
-			createEnemy(enemies, temprand, &enemyTextureG, &enemyTextureR);
+			createEnemy(enemies, temprand, enemyTexture);
 			delayEnemySpawnClock.restart();
 			if (enemyRespawnTimeClamp > 1000.0f) {
 				enemyRespawnTimeClamp-=5;
@@ -292,12 +299,13 @@ void updateEnemies(std::vector<Enemy>& vect, float deltaTime, std::vector<Box> &
 	for (Enemy& enemy : vect) {
 		enemy.Update(deltaTime);
 	}
+	srand(time(0));
 	for (int i = 0;i < vect.size();i++) {
 		if (vect[i].getHp()<=0) {
 			if (!vect[i].isAlreadySpawnBox()) {
 				vect[i].spawnBox();
 				if (vect[i].isSpawnBox()) {
-					vectBox.push_back(Box(texture, vect[i].GetPosition(),vect[i].getSpawnBoxInt()));
+					vectBox.push_back(Box(texture, vect[i].GetPosition(),vect[i].getSpawnBoxInt()+rand()));
 				}
 				vect[i].alreadySpawnBox(true);
 			}
@@ -319,21 +327,65 @@ void updateBoxes(std::vector<Box>& vect, float deltaTime,std::vector<Gun>& gunVe
 		}
 	}
 }
-void createEnemy(std::vector<Enemy>& vect, int type,sf::Texture *textureG,sf::Texture *textureR) {
+void createEnemy(std::vector<Enemy>& vect, int type,std::vector<sf::Texture*> texture) {
 	srand(time(NULL));
-	int ran = rand();
-	switch (type) {
+	int salt1 = rand();
+	srand(salt1);
+	int salt2 = rand();
+	srand(salt2);
+	int salt3 = rand();
+	srand(salt3);
+	int ran = rand()+1;
+	srand(ran+1);
+	int ran1 = rand()+1;
+	std::cout << ran1 << " " << ran << std::endl;
+	switch (ran % 3) {
 		case 0:
-			vect.push_back(Enemy(textureG, sf::Vector2u(11, 1), 0.095f, 150.0f, 1,ran));
+			switch (ran % 10) {
+			case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+					vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(530, 0), 0.095f, ran % 10, ran));
+					break;
+			case 2:
+					vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(530, 0), 0.095f, ran % 10, ran));
+					break;
+			}
 			break;
 		case 1:
-			vect.push_back(Enemy(textureR, sf::Vector2u(11, 1), 0.095f, 150.0f, 1,ran));
+			switch (ran % 10) {
+			case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+				vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(550, 0), 0.095f, ran % 10, ran));
+				break;
+			case 2:
+				vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(550, 0), 0.095f, ran % 10, ran));
+				break;
+			}
+			break;
+		case 2:
+			switch (ran % 10) {
+			case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+				vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(530, 0), 0.095f, ran % 10, ran));
+				break;
+			case 2:
+				vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(530, 0), 0.095f, ran % 10, ran));
+				break;
+			}
+			switch (ran1 % 10) {
+			case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+				vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(550, 0), 0.095f, ran1 % 10, ran1));
+				break;
+			case 2:
+				vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(550, 0), 0.095f, ran1 % 10, ran1));
+				break;
+			}
 			break;
 	}
 }
 void updateGuns(std::vector<Gun>& vect,float deltaTime){
 	for (int i = 0 ; i < vect.size() ; i++) {
-		if (vect[i].isPickUp()) {
+		for (Gun& gun : vect) {
+			gun.Update(deltaTime);
+		}
+		if (vect[i].isPickUp() ||	vect[i].isDestroy()) {
 			vect.erase(vect.begin() + i);
 		}
 	}

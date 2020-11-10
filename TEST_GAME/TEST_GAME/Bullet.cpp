@@ -8,17 +8,17 @@ Bullet::Bullet(sf::Texture* texture, int type, bool faceRight, sf::Vector2f posi
 	case 0:
 		this->speed = 400.0f;
 		this->faceRight = faceRight;
-		this->damage = 50.0f;
+		this->damage = 75.0f;
 		break;
 	case 1:
 		this->speed = 450.0f;
 		this->faceRight = faceRight;
-		this->damage = 20.0f;
+		this->damage = 25.0f;
 		break;
 	case 2:
 		this->speed = 500.0f;
 		this->faceRight = faceRight;
-		this->damage = 150.0f;
+		this->damage = 225.0f;
 		break;
 	}
 	body.setSize(sf::Vector2f(8.0f, 8.0f));
