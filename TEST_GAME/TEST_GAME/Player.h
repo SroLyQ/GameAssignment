@@ -32,9 +32,11 @@ private:
 	Animation animation;
 	sf::Clock gunType1Clock;
 	sf::Clock gunType2Clock;
+	sf::Clock gunType3Clock;
 
 	float gunType1ClockFloat;
 	float gunType2ClockFloat;
+	float gunType3ClockFloat;
 	float speed;
 	bool restartClock;
 	bool  faceRight;

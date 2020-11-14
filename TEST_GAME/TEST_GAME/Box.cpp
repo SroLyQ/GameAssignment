@@ -9,15 +9,15 @@ Box::Box(sf::Texture* texture, sf::Vector2f position,int gunType)
 	body.setOrigin(body.getSize()/2.0f);
 	body.setPosition(position);
 	body.setTexture(texture);
-	switch (gunType%3) {
-		case 0: 
-			this->gunType = 0;
-			break;
-		case 1:
+	switch (gunType%7) {
+	case 0: case 1: case 4:/*
 			this->gunType = 1;
-			break;
-		case 2:
+			break;*/
+	case 5:	case 2: case 6:/*
 			this->gunType = 2;
+			break;*/
+		case 3: 
+			this->gunType = 3;
 			break;
 	}
 }

@@ -31,6 +31,7 @@ private:
 	Animation animation;
 
 	int randomInt;
+	int randomInt2;
 	int typeOfBullet;
 	bool spawnBoxBool;
 	bool isAlreadySpawnBoxBool;

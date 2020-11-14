@@ -11,7 +11,8 @@ public:
 	void Draw(sf::RenderWindow& window);
 	void Update(float deltaTime);
 	void setDestroy(bool isDestroy);
-
+	
+	float getTimeAlive() { return fadingTime; }
 	int GetType() { return type; }
 	Collider GetCollider() { return Collider(body); }
 	bool isDestroy() { return isDestroyBool; }
@@ -20,12 +21,15 @@ public:
 private:
 	sf::RectangleShape body;
 	sf::RectangleShape textureRec;
-
+	sf::Clock fadingClock;
 	sf::Vector2f velocity;
+	
+	float fadingTime;
 	bool faceRight;
 	float speed;
 	int type;
 	bool isDestroyBool;
+	bool isFadingBool;
 	float damage;
 };
 

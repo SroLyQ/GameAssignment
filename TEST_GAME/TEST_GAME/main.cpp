@@ -57,7 +57,9 @@ int main()
 	sf::Texture gunTexture0;
 	sf::Texture gunTexture1;
 	sf::Texture gunTexture2;
+	sf::Texture gunTexture3;
 	sf::Texture bulletTexture;
+	sf::Texture laserTexture;
 	gunTexture0.loadFromFile("./Sprite/Object/Guns/0_R.png");
 	gunTexture1.loadFromFile("./Sprite/Object/Guns/1.png");
 	gunTexture2.loadFromFile("./Sprite/Object/Guns/2.png");
@@ -68,10 +70,11 @@ int main()
 	BG_BuildingTexture.loadFromFile("Sprite/Background/Buildings.png");
 	if (!enemyTexture1.loadFromFile("Sprite/Monster/Animation_Walk_Monster1.png")) printf("Load File Error");
 	if (!enemyTexture2.loadFromFile("Sprite/Monster/Animation_Walk_Monster2.png")) printf("Load File Error");
-
+	laserTexture.loadFromFile("./Sprite/Object/laserBullet.png");
 	gunTexture_R.push_back(&gunTexture0);
 	gunTexture_R.push_back(&gunTexture1);
 	gunTexture_R.push_back(&gunTexture2);
+	gunTexture_R.push_back(&gunTexture3);
 	enemyTexture.push_back(&enemyTexture1);
 	enemyTexture.push_back(&enemyTexture2);
 	/// Window ///
@@ -138,8 +141,6 @@ int main()
 			deltaTime = 1.0f / 60.0f;
 		}
 		sf::Event evnt;
-		window.draw(BG_Color);
-		window.draw(BG_Building);
 		while (window.pollEvent(evnt)) {
 			switch (evnt.type) {
 			case sf::Event::Closed:
@@ -161,11 +162,16 @@ int main()
 			}
 		}
 		if (player.isShooting() && delayShoot > player.getShootDelayTime()) {
-			bullets.push_back(Bullet(&bulletTexture, player.GetGunType(), player.isFaceRight(),player.GetGunPosition()));
+			if (player.GetGunType() != 3) {
+				bullets.push_back(Bullet(&bulletTexture, player.GetGunType(), player.isFaceRight(),player.GetGunPosition()));
+			}
+			else {
+				bullets.push_back(Bullet(&laserTexture, player.GetGunType(), player.isFaceRight(), player.GetGunPosition()));
+			}
 			delayShootClock.restart();
 		}   
-		updateEnemies(enemies, deltaTime, boxes, &boxTexture);
 		updateBullet(bullets, deltaTime); 
+		updateEnemies(enemies, deltaTime, boxes, &boxTexture);
 		updateBoxes(boxes, deltaTime,guns,gunTexture_R);
 		updateGuns(guns, deltaTime);
 		for (int i = 0;i < boxes.size();i++) {
@@ -191,6 +197,9 @@ int main()
 		playerCollisionWithPlatforms(walls, player, playerCol, direction);
 		playerCollisionWithPlatforms(platforms, player, playerCol, direction);
 		playerCollisionWithPlatforms(spawns, player, playerCol, direction);
+		window.clear();
+		window.draw(BG_Color);
+		window.draw(BG_Building);
 		drawPlatform(walls, window);
 		drawPlatform(platforms, window);
 		drawBullet(bullets, window);
@@ -230,25 +239,44 @@ void enemyCollisionWithPlatforms(std::vector<Platform>& vect, Enemy& enemy, Coll
 }
 void platformCollisionWithBullets(std::vector<Platform>& vect, Bullet& bullet, Collider col, sf::Vector2f direction) {
 	for (Platform& platform : vect) {
-		if (platform.GetCollider().CheckCollision(col, direction, 1.0f)) {
-			bullet.setDestroy(true);
-			//std::cout << bullet.isDestroy() << std::endl;
+		if (bullet.GetType() != 3) {
+			if (platform.GetCollider().CheckCollision(col, direction, 1.0f)) {
+				bullet.setDestroy(true);
+			}
 		}
 	}
 }
 void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collider col, sf::Vector2f direction) {
 	for (Bullet& bullet : vect) {
-		if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
-			bullet.setDestroy(true);
-			enemy.hitWithBullet(bullet);
+		if (bullet.GetType() != 3) {
+			if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
+				bullet.setDestroy(true);
+				enemy.hitWithBullet(bullet);
+			}
+		}
+		else {
+			if (bullet.getTimeAlive() < 800.0f) {
+				if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
+					enemy.hitWithBullet(bullet);
+				}
+			}
 		}
 	}
 }
 void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction) {
 	for (Bullet& bullet : vect) {
-		if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
-			bullet.setDestroy(true);
-			box.hitWithBullet(bullet);
+		if (bullet.GetType() != 3) {
+			if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
+					bullet.setDestroy(true);
+				box.hitWithBullet(bullet);
+			}
+		}
+		else {
+			if (bullet.getTimeAlive() < 800.0f) {
+				if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
+					box.hitWithBullet(bullet);
+				}
+			}
 		}
 	}
 }
@@ -288,6 +316,9 @@ void drawGuns(std::vector<Gun>& vect, sf::RenderWindow& window) {
 void updateBullet(std::vector<Bullet>& vect, float deltaTime) {
 	for (Bullet& bullet : vect) {
 		bullet.Update(deltaTime);
+		if (bullet.getTimeAlive() > 300.0f && bullet.GetType()==3) {
+			bullet.setDestroy(true);
+		}
 	}
 	for (int i = 0;i < vect.size();i++) {
 		if (vect[i].isDestroy()) {
@@ -338,7 +369,6 @@ void createEnemy(std::vector<Enemy>& vect, int type,std::vector<sf::Texture*> te
 	int ran = rand()+1;
 	srand(ran+1);
 	int ran1 = rand()+1;
-	std::cout << ran1 << " " << ran << std::endl;
 	switch (ran % 3) {
 		case 0:
 			switch (ran % 10) {

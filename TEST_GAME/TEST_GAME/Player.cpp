@@ -38,17 +38,25 @@ void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Textu
 			gunTextureRec.setSize(sf::Vector2f(20.0f, 10.0f));
 			gunType1Clock.restart();
 			gunType2Clock.restart();
+			gunType3Clock.restart();
 			break;
 		case 1:
 			gunTextureRec.setSize(sf::Vector2f(30.0f, 16.0f));
 			gunType1ClockFloat = gunType1Clock.getElapsedTime().asSeconds();
 			gunType2Clock.restart();
+			gunType3Clock.restart();
 			break;
 		case 2:
 			gunTextureRec.setSize(sf::Vector2f(24.0f, 12.0f));
 			gunType2ClockFloat = gunType2Clock.getElapsedTime().asSeconds();
 			gunType1Clock.restart();
+			gunType3Clock.restart();
 			break;
+		case 3:
+			gunTextureRec.setSize(sf::Vector2f(34.0f, 16.0f));
+			gunType3ClockFloat = gunType3Clock.getElapsedTime().asSeconds();
+			gunType1Clock.restart();
+			gunType2Clock.restart();
 	}
 	if (restartClock) {
 		gunType1Clock.restart();
@@ -64,6 +72,11 @@ void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Textu
 		this->gunType = 0;
 		gunType2Clock.restart();
 		gunType2ClockFloat = 0.0f;
+	}
+	else if (gunType3ClockFloat > 7.0f) {
+		this->gunType = 0;
+		gunType3Clock.restart();
+		gunType3ClockFloat = 0.0f;
 	}
 	gunTextureRec.setOrigin(gunTextureRec.getSize() / 2.0f);
 	if (faceRight) {
@@ -91,9 +104,8 @@ void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Textu
 		if (shootingBool == false)
 			shootingBool = true;
 	}
-	//std::cout << velocity.x << " " << velocity.y << std::endl;
 	velocity.y += 981.0f * deltaTime;
-
+	
 	if (velocity.x == 0.0f) {
 		texture->loadFromFile("Sprite/Player/Animation_Idle_R.png");
 	}

@@ -2,6 +2,8 @@
 Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount,sf::Vector2f position,float switchTime,int type,int randomInt):
 	animation(texture, imageCount, switchTime)
 {
+	srand(randomInt);
+	randomInt2 = rand();
 	this->isAlreadySpawnBoxBool = false;
 	switch (randomInt%3) {
 		case 0:
@@ -128,7 +130,6 @@ void Enemy::Draw(sf::RenderWindow& window)
 void Enemy::OnCollision(sf::Vector2f direction)
 {
 
-	//std::cout << "Direction " << direction.x << std::endl;
 	if (direction.x < 0.0f) {
 		velocity.x = -1*speed;
 	}
@@ -140,7 +141,6 @@ void Enemy::OnCollision(sf::Vector2f direction)
 		isOnGround = true;
 	}
 
-	//std::cout << velocity.x << " " << velocity.y << std::endl;
 }
 
 void Enemy::hitWithBullet(Bullet& bullet)
@@ -152,7 +152,7 @@ void Enemy::hitWithBullet(Bullet& bullet)
 
 void Enemy::spawnBox()
 {
-	switch (this->randomInt % 18) {
+	switch ((this->randomInt + randomInt2) % 18) {
 		case 0:
 		case 5:
 		case 4:
