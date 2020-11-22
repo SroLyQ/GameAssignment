@@ -14,37 +14,50 @@ public:
 	void OnCollision(sf::Vector2f direction);
 	void setGunType(int gunType);
 	void setGunTexture(sf::Texture* texture);
+	void changeHp(int hpChanger);
+	void setIsImmune(bool isImmune);
 
-	int GetGunType() { return gunType; }
 	sf::Vector2f GetPosition() { return body.getPosition(); }
 	sf::Vector2f GetGunPosition() { return gunTextureRec.getPosition(); }
 	Collider GetCollider() { return Collider(body); }
+	float getShootDelayTime() { return delayShoot; }
 	bool isFaceRight() { return faceRight; }
 	bool isShooting() { return shootingBool; }
-	float getShootDelayTime() { return delayShoot; }
-	float getHp() { return hp; }
+	bool isImmune() { return isImmuneBool; }
+	int getHp() { return hp; }
+	int GetGunType() { return gunType; }
 
 private:
 	sf::RectangleShape body;
+	sf::RectangleShape bodyTexture;
 	sf::RectangleShape gunTextureRec;
+	sf::RectangleShape icon;
+	sf::RectangleShape heart[4];
 	sf::Texture gunTexture;
+	sf::Texture fullHeartTexture;
+	sf::Texture halfHeartTexture;
+	sf::Texture emptyHeartTexture;
+	sf::Texture iconTexture;
 	sf::Vector2f velocity;
-	Animation animation;
 	sf::Clock gunType1Clock;
 	sf::Clock gunType2Clock;
 	sf::Clock gunType3Clock;
+	sf::Clock immuneClock;
+	Animation animation;
 
 	float gunType1ClockFloat;
 	float gunType2ClockFloat;
 	float gunType3ClockFloat;
 	float speed;
+	float jumpHeight;
+	float delayShoot;
+	float immuneClockFloat;
 	bool restartClock;
 	bool  faceRight;
 	bool shootingBool;
-	float hp;
 	bool canJump;
-	float jumpHeight;
-	float delayShoot;
+	bool isImmuneBool;
+	int hp;
 	int gunType;
 
 };

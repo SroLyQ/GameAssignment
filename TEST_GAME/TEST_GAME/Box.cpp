@@ -5,17 +5,18 @@ Box::Box(sf::Texture* texture, sf::Vector2f position,int gunType)
 	this->hp = 50;
 	this->gunType = gunType;
 	this->isDestroyBool = false;
+	this->isOnGroundBool = false;
 	body.setSize(sf::Vector2f(35.0f, 35.0f));
 	body.setOrigin(body.getSize()/2.0f);
 	body.setPosition(position);
 	body.setTexture(texture);
 	switch (gunType%7) {
-	case 0: case 1: case 4:/*
+	case 0: case 1: case 4:
 			this->gunType = 1;
-			break;*/
-	case 5:	case 2: case 6:/*
+			break;
+	case 5:	case 2: case 6:
 			this->gunType = 2;
-			break;*/
+			break;
 		case 3: 
 			this->gunType = 3;
 			break;
@@ -57,4 +58,9 @@ void Box::hitWithBullet(Bullet& bullet)
 {
 	this->hp -= bullet.GetDamage();
 	
+}
+
+void Box::setIsOnGround(bool isOnGround)
+{
+	this->isOnGroundBool = isOnGround;
 }

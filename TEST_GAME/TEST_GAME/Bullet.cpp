@@ -52,8 +52,6 @@ Bullet::Bullet(sf::Texture* texture, int type, bool faceRight, sf::Vector2f posi
 			body.setPosition(position.x - 160.0f, position.y);
 		break;
 	}
-	body.setOutlineColor(sf::Color::Red);
-	body.setOutlineThickness(1);
 	body.setTexture(texture);
 }
 

@@ -4,6 +4,9 @@ Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount,sf::Vector2f position
 {
 	srand(randomInt);
 	randomInt2 = rand();
+	this->timeAliveClock.restart();
+	this->isHitBool = false;
+	this->timeAlive = 0.0f;
 	this->isAlreadySpawnBoxBool = false;
 	switch (randomInt%3) {
 		case 0:
@@ -34,6 +37,9 @@ Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount,sf::Vector2f position
 			body.setOrigin(body.getSize() / 2.0f);
 			body.setPosition(position);
 			body.setTexture(texture);
+			this->type = 0;
+			this->score = 50;
+			this->dmg = -1;
 			break;  
 		case 2: 
 			this->hp = 450.0f;
@@ -42,16 +48,20 @@ Enemy::Enemy(sf::Texture* texture, sf::Vector2u imageCount,sf::Vector2f position
 			body.setOrigin(body.getSize() / 2.0f);
 			body.setPosition(position);
 			body.setTexture(texture);
+			this->type = 1;
+			this->score = 1500;
+			this->dmg = -2;
+			break;
 	}
 }
 
 Enemy::~Enemy()
 {
 }
-int temp=30;
 float tempSpeed;
 void Enemy::Update( float deltaTime)
 {
+	timeAlive = timeAliveClock.getElapsedTime().asMilliseconds();
 	isOnGround = false;
 	if (this->hp <= 0) {
 		isDeadBool = true;
@@ -67,36 +77,35 @@ void Enemy::Update( float deltaTime)
 	if (velocity.y > 10000) {
 		velocity.y = 981.0f;
 	}
-	if (isHit == true) {
+	if (isHitBool == true) {
 		if (velocity.x != 0.0f) {
 			tempSpeed = velocity.x;
 		}
-		if (temp > 0) {
+		if (timeAlive-delayTime < 70) {
 			body.setFillColor(sf::Color(255, 0, 0));
-			temp -= 1;
 		}
 		else {
 			body.setFillColor(sf::Color(255, 255, 255));
-			isHit = false;
-			temp = 30;
+			isHitBool = false;
+			delayTime = 0;
 		}
 		if (isOnGround) {
 			switch (typeOfBullet) {
-				case 0:
-					if (temp > 0) {
-						velocity.x = 0.0f;
-					}
-					else {
-						velocity.x = tempSpeed;
-					}
-				case 1:
-					body.move(-velocity * deltaTime);
-					animation.Update(deltaTime, faceRight);
-					body.setTextureRect(animation.uvRect);
-				case 2:
-					body.move(-velocity*1.50f* deltaTime);
-					animation.Update(deltaTime, faceRight);
-					body.setTextureRect(animation.uvRect);
+			case 0:
+				if (timeAlive - delayTime < 70) {
+					velocity.x = 0.0f;
+				}
+				else {
+					velocity.x = tempSpeed;
+				}
+			case 1:
+				body.move(-velocity * deltaTime);
+				animation.Update(deltaTime, faceRight);
+				body.setTextureRect(animation.uvRect);
+			case 2:
+				body.move(-velocity * 1.50f * deltaTime);
+				animation.Update(deltaTime, faceRight);
+				body.setTextureRect(animation.uvRect);
 			}
 
 		}
@@ -106,7 +115,7 @@ void Enemy::Update( float deltaTime)
 		body.setTextureRect(animation.uvRect);
 		body.move(velocity * deltaTime);
 	}
-	else if (!isDeadBool && !isHit) {
+	else if (!isDeadBool && !isHitBool) {
 		body.setTextureRect(animation.uvRect);
 		body.move(velocity * deltaTime);
 	}
@@ -145,9 +154,10 @@ void Enemy::OnCollision(sf::Vector2f direction)
 
 void Enemy::hitWithBullet(Bullet& bullet)
 {
+	delayTime = timeAliveClock.getElapsedTime().asMilliseconds();
 	hp-=bullet.GetDamage();
 	this->typeOfBullet = bullet.GetType();
-	this->isHit = true;
+	this->isHitBool = true;
 }
 
 void Enemy::spawnBox()
@@ -162,6 +172,9 @@ void Enemy::spawnBox()
 		case 16:
 			this->spawnBoxBool = true;
 			break;
+	}
+	if (this->type == 1) {
+		this->spawnBoxBool = true;
 	}
 }
 

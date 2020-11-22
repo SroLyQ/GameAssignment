@@ -14,8 +14,10 @@ public:
 	void Update(float deltaTime);
 	void OnCollision(sf::Vector2f direction);
 	void hitWithBullet(Bullet& bullet);
+	void setIsOnGround(bool isOnGround);
 
 	int GetGunType() { return gunType; }
+	bool isOnGround() { return isOnGroundBool; }
 	bool isDesttoy() { return isDestroyBool; }
 	Collider GetCollider() { return Collider(body); }
 	sf::Vector2f GetPosition() { return body.getPosition(); }
@@ -23,6 +25,7 @@ public:
 private:
 	sf::RectangleShape body;
 
+	bool isOnGroundBool;
 	bool isDestroyBool;
 	sf::Vector2f velocity;
 	float hp;
