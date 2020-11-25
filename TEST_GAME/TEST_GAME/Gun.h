@@ -8,7 +8,8 @@ public:
 
 	void Draw(sf::RenderWindow& window);
 	void setPickUp(bool isPickUp);
-	void Update(float deltaTime);
+	void Update(float deltaTime, State* state);
+	void setPauseTime(float pauseTime);
 
 	bool isDestroy() { return isDestroyBool; }
 	bool isPickUp() { return isPickUpBool; }
@@ -22,6 +23,7 @@ private:
 
 	float timeAlive;
 	float speed;
+	float pauseTime;
 	bool moveUp;
 	bool isPickUpBool;
 	bool isDestroyBool;

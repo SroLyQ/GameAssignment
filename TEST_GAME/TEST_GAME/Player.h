@@ -9,13 +9,15 @@ public:
 	Player(sf::Texture *texture, sf::Vector2u imageCount, float switchTime,float speed,float jumpHeight);
 	~Player();
 
-	void Update(sf::Texture* texture,float deltaTime, std::vector<sf::Texture*> gunTexture_R );
+	void Update(sf::Texture* texture,float deltaTime, std::vector<sf::Texture*> gunTexture_R ,State* state);
 	void Draw(sf::RenderWindow& window);
 	void OnCollision(sf::Vector2f direction);
 	void setGunType(int gunType);
 	void setGunTexture(sf::Texture* texture);
 	void changeHp(int hpChanger);
 	void setIsImmune(bool isImmune);
+	void setPauseTime(float pauseTime);
+	void restart();
 
 	sf::Vector2f GetPosition() { return body.getPosition(); }
 	sf::Vector2f GetGunPosition() { return gunTextureRec.getPosition(); }
@@ -24,6 +26,7 @@ public:
 	bool isFaceRight() { return faceRight; }
 	bool isShooting() { return shootingBool; }
 	bool isImmune() { return isImmuneBool; }
+	bool isDead() { return isDeadBool; }
 	int getHp() { return hp; }
 	int GetGunType() { return gunType; }
 
@@ -52,11 +55,14 @@ private:
 	float jumpHeight;
 	float delayShoot;
 	float immuneClockFloat;
+	float pauseTimeGun;
+	float pauseTimeImmune;
 	bool restartClock;
 	bool  faceRight;
 	bool shootingBool;
 	bool canJump;
 	bool isImmuneBool;
+	bool isDeadBool;
 	int hp;
 	int gunType;
 

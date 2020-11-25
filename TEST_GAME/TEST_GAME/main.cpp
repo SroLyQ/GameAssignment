@@ -8,7 +8,7 @@
 #include "Gun.h"
 #include "Button.h"
 
-void showText(sf::Vector2f position, std::string word, sf::Font *font, int size, sf::RenderWindow& window);
+void showText(sf::Vector2f position, std::string word, sf::Font* font, int size, sf::RenderWindow& window);
 void playerCollisionWithEnemy(std::vector<Enemy>& vect, Player& player, Collider playerCol, sf::Vector2f direction);
 void playerCollisionWithGuns(std::vector<Gun>& vect, Player& player, Collider col, sf::Vector2f direction);
 void boxCollisionWithPlatforms(std::vector<Platform>& vect, Box& box, Collider col, sf::Vector2f direction);
@@ -26,7 +26,14 @@ void createEnemy(std::vector<Enemy>& vect, int type, std::vector<sf::Texture*> t
 void drawBoxes(std::vector<Box>& vect, sf::RenderWindow& window);
 void updateBoxes(std::vector<Box>& vect, float deltaTime, std::vector<Gun>& gunVect, std::vector<sf::Texture*> gunTexture);
 void drawGuns(std::vector<Gun>& vect, sf::RenderWindow& window);
-void updateGuns(std::vector<Gun>& vect, float deltaTime);
+void updateGuns(std::vector<Gun>& vect, float deltaTime, State& state);
+void drawButtons(std::vector<Button>& vect, sf::RenderWindow& window, int gameState);
+void updateButtons(std::vector<Button>& vect, sf::RenderWindow& window, int gameState, State& state);
+void drawPAUSE(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font);
+void drawEND_GAME(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font, int score);
+void eraseEnemy(std::vector<Enemy>& vect);
+void eraseGun(std::vector<Gun>& vect);
+void eraseBox(std::vector<Box>& vect);
 
 int main()
 {
@@ -44,6 +51,7 @@ int main()
 	std::vector<Enemy> enemies;
 	std::vector<Bullet> bullets;
 	std::vector<Gun> guns;
+	std::vector<Button> buttons;
 	std::vector<sf::Texture*> gunTexture_R, enemyTexture;
 	/// Texture ///
 	sf::Texture playerTexture;
@@ -62,6 +70,8 @@ int main()
 	sf::Texture gunTexture3;
 	sf::Texture bulletTexture;
 	sf::Texture laserTexture;
+	sf::Texture UIBG;
+	sf::Texture buttonBG;
 	gunTexture0.loadFromFile("./Sprite/Object/Guns/0_R.png");
 	gunTexture1.loadFromFile("./Sprite/Object/Guns/1.png");
 	gunTexture2.loadFromFile("./Sprite/Object/Guns/2.png");
@@ -80,6 +90,8 @@ int main()
 	gunTexture_R.push_back(&gunTexture3);
 	enemyTexture.push_back(&enemyTexture1);
 	enemyTexture.push_back(&enemyTexture2);
+	UIBG.loadFromFile("./Sprite/Object/UIbg.png");
+	buttonBG.loadFromFile("./Sprite/Object/buttonBG.png");
 	/// Window ///
 	sf::RenderWindow window(sf::VideoMode(1080, 720), "TEST_GAME", sf::Style::Close | sf::Style::Resize);
 	//variable
@@ -127,13 +139,16 @@ int main()
 	sf::Clock delayEnemySpawnClock;
 	sf::Clock deltaTimeClock;
 	sf::Clock gameClock;
-
+	sf::Clock escPauseClock;
+	sf::Clock escGameClock;
 	//Timer
-	float delayShoot=0.0f;
-	float delayEnemySpawn=0.0f;
+	float delayEsc = 250.0f;
+	float pauseTime = 0.0f;
+	float delayShoot = 0.0f;
+	float delayEnemySpawn = 0.0f;
 	float enemyRespawnTimeClamp = 1500.0f;
 	float deltaTime = 0.0f;
-	float gameTime=0.0f;
+	float gameTime = 0.0f;
 
 	//variable
 	int score = 0;
@@ -142,22 +157,31 @@ int main()
 	sf::Font font;
 	font.loadFromFile("./Sprite/Font/PressStart2P-vaV7.ttf");
 
+
+	//State
+	State state;
+
+	//Pause UI
+	sf::RectangleShape pauseUIBG;
+	pauseUIBG.setSize(sf::Vector2f(490.0f, 370.0f));
+	pauseUIBG.setOrigin(pauseUIBG.getSize() / 2.0f);
+	pauseUIBG.setPosition(540.0f, 360.0f);
+	pauseUIBG.setTexture(&UIBG);
+
+	//END_GAME UI
+	sf::RectangleShape END_GAMEUIBG;
+	END_GAMEUIBG.setSize(sf::Vector2f(490.0f, 370.0f));
+	END_GAMEUIBG.setOrigin(pauseUIBG.getSize() / 2.0f);
+	END_GAMEUIBG.setPosition(540.0f, 360.0f);
+	END_GAMEUIBG.setTexture(&UIBG);
+
 	//Button
-	Button test(sf::Vector2f(512.0f, 384.0f), sf::Vector2f(100.0f, 100.0f), &font ,"TEST",nullptr);
-	
+	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 180.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "RESUME", &buttonBG, PAUSE, RESUME));
+	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 410.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "EXIT", &buttonBG, PAUSE, EXIT));
+	buttons.push_back(Button(sf::Vector2f(END_GAMEUIBG.getOrigin().x + 410.0f, END_GAMEUIBG.getOrigin().y + 285.0f),sf::Vector2f(195.0f, 70.0f), &font, "CONTINUE", &buttonBG, END_GAME,END_GAME_CONTINUE));
+
 	while (window.isOpen())
 	{
-		gameTime = gameClock.getElapsedTime().asSeconds();
-		if (gameTime > 180.0f) {
-			gameClock.restart();
-			gameTime = 30000.0f;
-		}
-		deltaTime = deltaTimeClock.restart().asSeconds();
-		delayShoot = delayShootClock.getElapsedTime().asMilliseconds();
-		delayEnemySpawn = delayEnemySpawnClock.getElapsedTime().asMilliseconds();
-		if (deltaTime > 1.0f / 60.0f) {
-			deltaTime = 1.0f / 60.0f;
-		}
 		sf::Event evnt;
 		while (window.pollEvent(evnt)) {
 			switch (evnt.type) {
@@ -169,71 +193,122 @@ int main()
 				break;
 			}
 		}
-		sf::Vector2f direction;
-		player.Update(&playerTexture, deltaTime, gunTexture_R);
-		if (delayEnemySpawn > std::fmax(1000.0f, std::fmax((std::fmod(rand(), enemyRespawnTimeClamp + 1)), enemyRespawnTimeClamp)) && gameTime > 5.0f) {
-			int temprand = rand() % 2;
-			createEnemy(enemies, temprand, enemyTexture,gameTime);
-			delayEnemySpawnClock.restart();
-			if (enemyRespawnTimeClamp > 1000.0f) {
-				enemyRespawnTimeClamp -= 5.0f;
-			}
-			if (enemyRespawnTimeClamp <= 1000.0f) {
-				enemyRespawnTimeClamp = 1500.0f;
+		state.Update();
+		if (state.getGameState() == PAUSE) {
+			escGameClock.restart();
+			state.setPauseTime(escPauseClock.getElapsedTime().asSeconds());
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) && escPauseClock.getElapsedTime().asMilliseconds() > delayEsc) {
+				pauseTime = escPauseClock.getElapsedTime().asSeconds();
+				for (Gun& gun : guns) {
+					gun.setPauseTime(pauseTime);
+				}
+				player.setPauseTime(pauseTime);
+				escPauseClock.restart();
+				escGameClock.restart();
+				state.setGameState(GAME);
 			}
 		}
-		if (player.isShooting() && delayShoot > player.getShootDelayTime()) {
-			if (player.GetGunType() != 3) {
-				bullets.push_back(Bullet(&bulletTexture, player.GetGunType(), player.isFaceRight(), player.GetGunPosition()));
-			}
-			else {
-				bullets.push_back(Bullet(&laserTexture, player.GetGunType(), player.isFaceRight(), player.GetGunPosition()));
-			}
-			delayShootClock.restart();
-		}
-		updateBullet(bullets, deltaTime);
-		updateEnemies(enemies, deltaTime, boxes, &boxTexture,score);
-		updateBoxes(boxes, deltaTime, guns, gunTexture_R);
-		updateGuns(guns, deltaTime);
 
-		playerCollisionWithEnemy(enemies, player, playerCol, direction);
-		for (int i = 0;i < boxes.size();i++) {
-			Collider temp = boxes[i].GetCollider();
-			bulletCollisionWithBoxes(bullets, boxes[i], temp, direction);
-			boxCollisionWithPlatforms(platforms, boxes[i], temp, direction);
-			boxCollisionWithPlatforms(walls, boxes[i], temp, direction);
-		}
-		for (int i = 0;i < enemies.size();i++) {
-			if (!enemies[i].isDead()) {
-				Collider temp = enemies[i].GetCollider();
-				enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
-				enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
-				bulletCollisionWithEnemies(bullets, enemies[i], temp, direction);
+		if (state.getGameState() == GAME) {
+			if (pauseTime != 0.0f)
+				escPauseClock.restart();
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) && escGameClock.getElapsedTime().asMilliseconds() > delayEsc) {
+				escGameClock.restart();
+				escPauseClock.restart();
+				state.setGameState(PAUSE);
 			}
+			gameTime = gameClock.getElapsedTime().asSeconds();
+			if (gameTime - pauseTime > 180.0f) {
+				gameClock.restart();
+				gameTime = 30000.0f;
+			}
+			deltaTime = deltaTimeClock.restart().asSeconds() - pauseTime;
+			delayShoot = delayShootClock.getElapsedTime().asMilliseconds() - (pauseTime * 1000);
+			delayEnemySpawn = delayEnemySpawnClock.getElapsedTime().asMilliseconds() - (pauseTime * 1000);
+			if (deltaTime > 1.0f / 60.0f) {
+				deltaTime = 1.0f / 60.0f;
+			}
+			sf::Vector2f direction;
+			if (delayEnemySpawn > std::fmax(1000.0f, std::fmax((std::fmod(rand(), enemyRespawnTimeClamp + 1)), enemyRespawnTimeClamp)) && gameTime > 5.0f) {
+				int temprand = rand() % 2;
+				createEnemy(enemies, temprand, enemyTexture, gameTime);
+				delayEnemySpawnClock.restart();
+				if (enemyRespawnTimeClamp > 1000.0f) {
+					enemyRespawnTimeClamp -= 5.0f;
+				}
+				if (enemyRespawnTimeClamp <= 1000.0f) {
+					enemyRespawnTimeClamp = 1500.0f;
+				}
+			}
+			player.Update(&playerTexture, deltaTime, gunTexture_R, &state);
+			if (player.isShooting() && delayShoot > player.getShootDelayTime()) {
+				if (player.GetGunType() != 3) {
+					bullets.push_back(Bullet(&bulletTexture, player.GetGunType(), player.isFaceRight(), player.GetGunPosition()));
+				}
+				else {
+					bullets.push_back(Bullet(&laserTexture, player.GetGunType(), player.isFaceRight(), player.GetGunPosition()));
+				}
+				delayShootClock.restart();
+			}
+			updateBullet(bullets, deltaTime);
+			updateEnemies(enemies, deltaTime, boxes, &boxTexture, score);
+			updateBoxes(boxes, deltaTime, guns, gunTexture_R);
+			updateGuns(guns, deltaTime, state);
+			playerCollisionWithEnemy(enemies, player, playerCol, direction);
+			for (int i = 0;i < boxes.size();i++) {
+				Collider temp = boxes[i].GetCollider();
+				bulletCollisionWithBoxes(bullets, boxes[i], temp, direction);
+				boxCollisionWithPlatforms(platforms, boxes[i], temp, direction);
+				boxCollisionWithPlatforms(walls, boxes[i], temp, direction);
+			}
+			for (int i = 0;i < enemies.size();i++) {
+				if (!enemies[i].isDead()) {
+					Collider temp = enemies[i].GetCollider();
+					enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
+					enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
+					bulletCollisionWithEnemies(bullets, enemies[i], temp, direction);
+				}
+			}
+			for (int i = 0;i < bullets.size();i++) {
+				Collider temp = bullets[i].GetCollider();
+				platformCollisionWithBullets(walls, bullets[i], temp, direction);
+				platformCollisionWithBullets(platforms, bullets[i], temp, direction);
+			}
+			playerCollisionWithGuns(guns, player, playerCol, direction);
+			playerCollisionWithPlatforms(walls, player, playerCol, direction);
+			playerCollisionWithPlatforms(platforms, player, playerCol, direction);
+			playerCollisionWithPlatforms(spawns, player, playerCol, direction);
+
 		}
-		for (int i = 0;i < bullets.size();i++) {
-			Collider temp = bullets[i].GetCollider();
-			platformCollisionWithBullets(walls, bullets[i], temp, direction);
-			platformCollisionWithBullets(platforms, bullets[i], temp, direction);
-		}
-		playerCollisionWithGuns(guns, player, playerCol, direction);
-		playerCollisionWithPlatforms(walls, player, playerCol, direction);
-		playerCollisionWithPlatforms(platforms, player, playerCol, direction);
-		playerCollisionWithPlatforms(spawns, player, playerCol, direction);
 		window.clear();
-		window.draw(BG_Color);
-		window.draw(BG_Building);
-		test.Draw(window);
-		showText(sf::Vector2f(865.0f - (padding * std::to_string(score).size()), 25.0f), "SCORE:", &font, 32, window);
-		showText(sf::Vector2f(1053.0f-(padding*std::to_string(score).size()), 25.0f), std::to_string(score), &font, 32, window);
-		drawPlatform(walls, window);
-		drawPlatform(platforms, window);
-		drawBullet(bullets, window);
-		drawBoxes(boxes, window);
-		drawGuns(guns, window);
-		drawEnemies(enemies, window);
-		spawns[1].Draw(window);
-		player.Draw(window);
+		updateButtons(buttons, window, state.getGameState(), state);
+		pauseTime = 0.0f;
+		if (state.getGameState() == END_GAME) {
+			drawEND_GAME(END_GAMEUIBG, buttons, window, state.getGameState(), &font, score);
+			player.restart();
+			eraseEnemy(enemies);
+			gameTime = 0.0f;
+			gameClock.restart();
+		}
+		if (state.getGameState() == GAME || state.getGameState() == PAUSE) {
+			window.draw(BG_Color);
+			window.draw(BG_Building);
+			showText(sf::Vector2f(865.0f - (padding * std::to_string(score).size()), 25.0f), "SCORE:", &font, 32, window);
+			showText(sf::Vector2f(1053.0f - (padding * std::to_string(score).size()), 25.0f), std::to_string(score), &font, 32, window);
+			drawPlatform(walls, window);
+			drawPlatform(platforms, window);
+			drawBullet(bullets, window);
+			drawButtons(buttons, window, state.getGameState());
+			drawBoxes(boxes, window);
+			drawGuns(guns, window);
+			drawEnemies(enemies, window);
+			spawns[1].Draw(window);
+			player.Draw(window);
+			if (state.getGameState() == PAUSE) {
+				drawPAUSE(pauseUIBG, buttons, window, state.getGameState(), &font);
+			}
+
+		}
 		window.display();
 	}
 	return 0;
@@ -313,7 +388,7 @@ void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col,
 		if (box.isOnGround()) {
 			if (bullet.GetType() != 3) {
 				if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
-						bullet.setDestroy(true);
+					bullet.setDestroy(true);
 					box.hitWithBullet(bullet);
 				}
 			}
@@ -335,7 +410,7 @@ void boxCollisionWithPlatforms(std::vector<Platform>& vect, Box& box, Collider c
 		}
 	}
 }
-void drawPlatform(std::vector<Platform>& vect,sf::RenderWindow &window) {
+void drawPlatform(std::vector<Platform>& vect, sf::RenderWindow& window) {
 	for (Platform& platform : vect)
 	{
 		platform.Draw(window);
@@ -361,10 +436,24 @@ void drawGuns(std::vector<Gun>& vect, sf::RenderWindow& window) {
 		gun.Draw(window);
 	}
 }
+void drawButtons(std::vector<Button>& vect, sf::RenderWindow& window, int gameState) {
+	for (Button& button : vect) {
+		if (button.isShowInGameState() == gameState) {
+			button.Draw(window);
+		}
+	}
+}
+void updateButtons(std::vector<Button>& vect, sf::RenderWindow& window, int gameState, State& state) {
+	for (Button& button : vect) {
+		if (button.isShowInGameState() == gameState) {
+			button.Update(sf::Mouse::getPosition(window), &state);
+		}
+	}
+}
 void updateBullet(std::vector<Bullet>& vect, float deltaTime) {
 	for (Bullet& bullet : vect) {
 		bullet.Update(deltaTime);
-		if (bullet.getTimeAlive() > 300.0f && bullet.GetType()==3) {
+		if (bullet.getTimeAlive() > 300.0f && bullet.GetType() == 3) {
 			bullet.setDestroy(true);
 		}
 	}
@@ -374,17 +463,17 @@ void updateBullet(std::vector<Bullet>& vect, float deltaTime) {
 		}
 	}
 }
-void updateEnemies(std::vector<Enemy>& vect, float deltaTime, std::vector<Box> & vectBox,sf::Texture* texture,int& score) {
+void updateEnemies(std::vector<Enemy>& vect, float deltaTime, std::vector<Box>& vectBox, sf::Texture* texture, int& score) {
 	for (Enemy& enemy : vect) {
 		enemy.Update(deltaTime);
 	}
 	srand(time(0));
 	for (int i = 0;i < vect.size();i++) {
-		if (vect[i].getHp()<=0) {
+		if (vect[i].getHp() <= 0) {
 			if (!vect[i].isAlreadySpawnBox()) {
 				vect[i].spawnBox();
 				if (vect[i].isSpawnBox()) {
-					vectBox.push_back(Box(texture, vect[i].GetPosition(),vect[i].getSpawnBoxInt()+rand()));
+					vectBox.push_back(Box(texture, vect[i].GetPosition(), vect[i].getSpawnBoxInt() + rand()));
 				}
 				score += vect[i].getScore();
 				if (vect[i].getTimeAlive() / 1000 <= 10) {
@@ -399,7 +488,7 @@ void updateEnemies(std::vector<Enemy>& vect, float deltaTime, std::vector<Box> &
 		}
 	}
 }
-void updateBoxes(std::vector<Box>& vect, float deltaTime,std::vector<Gun>& gunVect,std::vector<sf::Texture*> gunTexture) {
+void updateBoxes(std::vector<Box>& vect, float deltaTime, std::vector<Gun>& gunVect, std::vector<sf::Texture*> gunTexture) {
 	for (Box& box : vect) {
 		box.Update(deltaTime);
 	}
@@ -411,7 +500,7 @@ void updateBoxes(std::vector<Box>& vect, float deltaTime,std::vector<Gun>& gunVe
 		}
 	}
 }
-void createEnemy(std::vector<Enemy>& vect, int type,std::vector<sf::Texture*> texture,float gameTime) {
+void createEnemy(std::vector<Enemy>& vect, int type, std::vector<sf::Texture*> texture, float gameTime) {
 	srand(time(NULL));
 	int salt1 = rand();
 	srand(salt1);
@@ -419,66 +508,66 @@ void createEnemy(std::vector<Enemy>& vect, int type,std::vector<sf::Texture*> te
 	srand(salt2);
 	int salt3 = rand();
 	srand(salt3);
-	int ran = rand()+1;
-	srand(ran+1);
-	int ran1 = rand()+1;
+	int ran = rand() + 1;
+	srand(ran + 1);
+	int ran1 = rand() + 1;
 	int moder = 0;
 	if (gameTime < 60.0f) {
 		moder = 2;
 	}
 	else moder = 10;
 	switch (ran % 3) {
-		case 0:
-			switch (ran % moder) {
-			case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
-					vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(530, 0), 0.095f, ran % moder, ran));
-					break;
-			case 2:
-					vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(530, 0), 0.095f, ran % moder, ran));
-					break;
-			}
-			break;
-		case 1:
-			switch (ran % moder) {
-			case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
-				vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(550, 0), 0.095f, ran % moder, ran));
-				break;
-			case 2:
-				vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(550, 0), 0.095f, ran % moder, ran));
-				break;
-			}
+	case 0:
+		switch (ran % moder) {
+		case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+			vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(530, 0), 0.095f, ran % moder, ran));
 			break;
 		case 2:
-			switch (ran % moder) {
-			case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
-				vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(530, 0), 0.095f, ran % moder, ran));
-				break;
-			case 2:
-				vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(530, 0), 0.095f, ran % moder, ran));
-				break;
-			}
-			switch (ran1 % moder) {
-			case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
-				vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(550, 0), 0.095f, ran1 % moder, ran1));
-				break;
-			case 2:
-				vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(550, 0), 0.095f, ran1 % moder, ran1));
-				break;
-			}
+			vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(530, 0), 0.095f, ran % moder, ran));
 			break;
+		}
+		break;
+	case 1:
+		switch (ran % moder) {
+		case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+			vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(550, 0), 0.095f, ran % moder, ran));
+			break;
+		case 2:
+			vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(550, 0), 0.095f, ran % moder, ran));
+			break;
+		}
+		break;
+	case 2:
+		switch (ran % moder) {
+		case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+			vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(530, 0), 0.095f, ran % moder, ran));
+			break;
+		case 2:
+			vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(530, 0), 0.095f, ran % moder, ran));
+			break;
+		}
+		switch (ran1 % moder) {
+		case 0:case 1:case 3:case 4:case 5:case 6:case 7:case 9:case 8:
+			vect.push_back(Enemy(texture[0], sf::Vector2u(11, 1), sf::Vector2f(550, 0), 0.095f, ran1 % moder, ran1));
+			break;
+		case 2:
+			vect.push_back(Enemy(texture[1], sf::Vector2u(5, 1), sf::Vector2f(550, 0), 0.095f, ran1 % moder, ran1));
+			break;
+		}
+		break;
 	}
 }
-void updateGuns(std::vector<Gun>& vect,float deltaTime){
-	for (int i = 0 ; i < vect.size() ; i++) {
+void updateGuns(std::vector<Gun>& vect, float deltaTime, State& state) {
+	for (int i = 0; i < vect.size(); i++) {
 		for (Gun& gun : vect) {
-			gun.Update(deltaTime);
+			gun.Update(deltaTime, &state);
 		}
-		if (vect[i].isPickUp() ||	vect[i].isDestroy()) {
+		if (vect[i].isPickUp() || vect[i].isDestroy()) {
 			vect.erase(vect.begin() + i);
 		}
 	}
 }
-void showText(sf::Vector2f position, std::string word, sf::Font *font, int size,sf::RenderWindow& window) {
+void showText(sf::Vector2f position, std::string word, sf::Font* font, int size, sf::RenderWindow& window) {
 	sf::Text text;
 	text.setFont(*font);
 	text.setPosition(position);
@@ -487,4 +576,24 @@ void showText(sf::Vector2f position, std::string word, sf::Font *font, int size,
 	text.setOutlineColor(sf::Color::Black);
 	text.setOutlineThickness(3);
 	window.draw(text);
+}
+void drawPAUSE(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font) {
+	window.draw(UIBG);
+	showText(sf::Vector2f(UIBG.getPosition().x - 105.0f, UIBG.getPosition().y - 90.0f), "PAUSE", font, 48, window);
+	drawButtons(vect, window, gameState);
+}
+void drawEND_GAME(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font,int score) {
+	window.draw(UIBG);
+	showText(sf::Vector2f(UIBG.getPosition().x - 115.0f, UIBG.getPosition().y - 110.0f), "SCORE", font, 48, window);
+	showText(sf::Vector2f(UIBG.getPosition().x - (15 * std::to_string(score).size()), UIBG.getPosition().y - 40.0f), std::to_string(score), font, 36, window);
+	drawButtons(vect, window, gameState);
+}
+void eraseEnemy(std::vector<Enemy>& vect) {
+	vect.erase(vect.begin(), vect.end());
+}
+void eraseBox(std::vector<Box>& vect) {
+	vect.erase(vect.begin(), vect.end());
+}
+void eraseGun(std::vector<Gun>& vect) {
+	vect.erase(vect.begin(), vect.end());
 }
