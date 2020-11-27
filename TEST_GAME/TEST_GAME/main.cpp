@@ -80,7 +80,10 @@ int main()
 	sf::Texture buttonBG;
 	sf::Texture MENUtexture;
 	sf::Texture LogoBorderTexture;
+	sf::Texture deSpawn;
+
 	MENUtexture.setRepeated(true);
+	deSpawn.loadFromFile("./Sprite/Object/Spike.png");
 	LogoBorderTexture.loadFromFile("./Sprite/Object/LogoFrame.png");
 	gunTexture0.loadFromFile("./Sprite/Object/Guns/0_R.png");
 	gunTexture1.loadFromFile("./Sprite/Object/Guns/1.png");
@@ -131,7 +134,7 @@ int main()
 	platforms.push_back(Platform(&Platform1, sf::Vector2f(350.0f, 25.0f), sf::Vector2f(877.0f, 480.0f)));
 
 	spawns.push_back(Platform(nullptr, sf::Vector2f(80.0f, 40.0f), sf::Vector2f(540.0f, 5.0f)));
-	spawns.push_back(Platform(nullptr, sf::Vector2f(80.0f, 40.0f), sf::Vector2f(540.0f, 715.0f)));
+	spawns.push_back(Platform(&deSpawn, sf::Vector2f(80.0f, 40.0f), sf::Vector2f(540.0f, 715.0f)));
 	/// Sprite ///
 	sf::Sprite BG_Color;
 	sf::Sprite BG_Building;
@@ -317,7 +320,6 @@ int main()
 			}
 			score = 0;
 			gameClock.restart();
-			std::cout << highScore.size() << std::endl;
 			if (state.isShowHighscore()) {
 				if (!state.isPushButton()) {
 					highScore.erase(highScore.begin(), highScore.end());
@@ -416,6 +418,12 @@ int main()
 			updateBoxes(boxes, deltaTime, guns, gunTexture_R);
 			updateGuns(guns, deltaTime, state);
 			playerCollisionWithEnemy(enemies, player, playerCol, direction);
+			if (spawns[1].GetCollider().CheckCollision(playerCol,direction,1.0f)) {
+				if (!player.isImmune()) {
+					player.setIsImmune(true);
+					player.changeHp(-1);
+				}
+			}
 			for (int i = 0;i < boxes.size();i++) {
 				Collider temp = boxes[i].GetCollider();
 				bulletCollisionWithBoxes(bullets, boxes[i], temp, direction, &boxHitSF);
@@ -520,9 +528,6 @@ int main()
 				}
 				highScore.push_back(std::make_pair(score, name));
 				std::sort(highScore.begin(), highScore.end());
-				for (int i = 5;i >= 1;i--) {
-					std::cout << highScore[i].first << " " << highScore[i].second << std::endl;
-				}
 				fclose(file);
 				file = fopen("./highScore.txt", "w");
 				char temp[26];

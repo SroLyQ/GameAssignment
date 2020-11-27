@@ -23,13 +23,13 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 	this->isDeadBool = false;
 	this->playerJumpBuffer.loadFromFile("./Soundtrack/playerJump.wav");
 	this->playerJumpSF.setBuffer(this->playerJumpBuffer);
-	this->playerJumpSF.setVolume(10);
+	this->playerJumpSF.setVolume(5);
 	this->playerDeadBuffer.loadFromFile("./Soundtrack/playerDead.wav");
 	this->playerDeadSF.setBuffer(this->playerDeadBuffer);
 	this->playerDeadSF.setVolume(10);
 	this->playerHitBuffer.loadFromFile("./Soundtrack/playerHit.wav");
 	this->playerHitSF.setBuffer(this->playerHitBuffer);
-	this->playerHitSF.setVolume(10);
+	this->playerHitSF.setVolume(20);
 
 	iconTexture.loadFromFile("./Sprite/Player/icon.png");
 	fullHeartTexture.loadFromFile("./Sprite/Player/FullHeart.png");
