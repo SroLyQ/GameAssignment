@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "Initial.h"
 #include "Collider.h"
 #include "Platform.h"
@@ -7,16 +8,20 @@
 #include "Box.h"
 #include "Gun.h"
 #include "Button.h"
+#include "Textbox.h"
+#include <utility>
+#include <algorithm>
+#include <string>
 
 void showText(sf::Vector2f position, std::string word, sf::Font* font, int size, sf::RenderWindow& window);
 void playerCollisionWithEnemy(std::vector<Enemy>& vect, Player& player, Collider playerCol, sf::Vector2f direction);
 void playerCollisionWithGuns(std::vector<Gun>& vect, Player& player, Collider col, sf::Vector2f direction);
 void boxCollisionWithPlatforms(std::vector<Platform>& vect, Box& box, Collider col, sf::Vector2f direction);
-void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collider col, sf::Vector2f direction);
+void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collider col, sf::Vector2f direction, sf::Sound* sound);
 void platformCollisionWithBullets(std::vector<Platform>& vect, Bullet& bullet, Collider col, sf::Vector2f direction);
 void playerCollisionWithPlatforms(std::vector<Platform>& vect, Player& player, Collider col, sf::Vector2f direction);
 void enemyCollisionWithPlatforms(std::vector<Platform>& vect, Enemy& enemy, Collider col, sf::Vector2f direction);
-void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction);
+void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction, sf::Sound* sound);
 void drawPlatform(std::vector<Platform>& vect, sf::RenderWindow& window);
 void drawBullet(std::vector<Bullet>& vect, sf::RenderWindow& window);
 void drawEnemies(std::vector<Enemy>& vect, sf::RenderWindow& window);
@@ -31,10 +36,11 @@ void drawButtons(std::vector<Button>& vect, sf::RenderWindow& window, int gameSt
 void updateButtons(std::vector<Button>& vect, sf::RenderWindow& window, int gameState, State& state);
 void drawPAUSE(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font);
 void drawEND_GAME(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font, int score);
+void drawMENU(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font, int frame);
 void eraseEnemy(std::vector<Enemy>& vect);
 void eraseGun(std::vector<Gun>& vect);
 void eraseBox(std::vector<Box>& vect);
-
+void eraseBullet(std::vector<Bullet>& vect);
 int main()
 {
 	srand(time(NULL));
@@ -72,6 +78,10 @@ int main()
 	sf::Texture laserTexture;
 	sf::Texture UIBG;
 	sf::Texture buttonBG;
+	sf::Texture MENUtexture;
+	sf::Texture LogoBorderTexture;
+	MENUtexture.setRepeated(true);
+	LogoBorderTexture.loadFromFile("./Sprite/Object/LogoFrame.png");
 	gunTexture0.loadFromFile("./Sprite/Object/Guns/0_R.png");
 	gunTexture1.loadFromFile("./Sprite/Object/Guns/1.png");
 	gunTexture2.loadFromFile("./Sprite/Object/Guns/2.png");
@@ -92,8 +102,9 @@ int main()
 	enemyTexture.push_back(&enemyTexture2);
 	UIBG.loadFromFile("./Sprite/Object/UIbg.png");
 	buttonBG.loadFromFile("./Sprite/Object/buttonBG.png");
+	MENUtexture.loadFromFile("./Sprite/Background/MENUBG.png");
 	/// Window ///
-	sf::RenderWindow window(sf::VideoMode(1080, 720), "TEST_GAME", sf::Style::Close | sf::Style::Resize);
+	sf::RenderWindow window(sf::VideoMode(1080, 720), "ULTRA CRATE BOX", sf::Style::Close);
 	//variable
 	bool isMoving = false, isLeft = false, isRight = true;
 	// Platform //
@@ -150,13 +161,18 @@ int main()
 	float deltaTime = 0.0f;
 	float gameTime = 0.0f;
 
+	//string
+	std::string name;
+
 	//variable
 	int score = 0;
+	int BGScrollMENU = 0;
+	int cntFrame = 0;
 	float padding = 33;
+
 	//Text
 	sf::Font font;
 	font.loadFromFile("./Sprite/Font/PressStart2P-vaV7.ttf");
-
 
 	//State
 	State state;
@@ -175,25 +191,148 @@ int main()
 	END_GAMEUIBG.setPosition(540.0f, 360.0f);
 	END_GAMEUIBG.setTexture(&UIBG);
 
+	//MENU UI
+	sf::RectangleShape MENUBG;
+	MENUBG.setSize(sf::Vector2f(1080, 720));
+	MENUBG.setOrigin(MENUBG.getSize() / 2.0f);
+	MENUBG.setPosition(540.0f, 360.0f);
+	MENUBG.setTextureRect(sf::IntRect(0, 0, 1080, 720));
+	MENUBG.setTexture(&MENUtexture);
+
+	sf::RectangleShape LogoBorder;
+	LogoBorder.setSize(sf::Vector2f(450, 270));
+	LogoBorder.setOrigin(LogoBorder.getSize() / 2.0f);
+	LogoBorder.setPosition(300.0f, 180.0f);
+	LogoBorder.setTexture(&LogoBorderTexture);
+
+	sf::RectangleShape Menu_Enemy1;
+	Menu_Enemy1.setSize(sf::Vector2f(65.0f, 75.0f));
+	Menu_Enemy1.setOrigin(Menu_Enemy1.getSize() / 2.0f);
+	Menu_Enemy1.setPosition(350.0f, 250.0f);
+	Menu_Enemy1.setTexture(enemyTexture[1]);
+	Menu_Enemy1.setTextureRect(sf::IntRect(0, 0, enemyTexture[1]->getSize().x / 5, enemyTexture[1]->getSize().y));
+
+	sf::RectangleShape Menu_Enemy2;
+	Menu_Enemy2.setSize(sf::Vector2f(40.0f, 45.0f));
+	Menu_Enemy2.setOrigin(Menu_Enemy1.getSize() / 2.0f);
+	Menu_Enemy2.setPosition(470.0f, 280.0f);
+	Menu_Enemy2.setTexture(enemyTexture[0]);
+	Menu_Enemy2.setTextureRect(sf::IntRect(0, 0, enemyTexture[0]->getSize().x / 10, enemyTexture[0]->getSize().y));
+
+	sf::RectangleShape Menu_Enemy3;
+	Menu_Enemy3.setSize(sf::Vector2f(40.0f, 45.0f));
+	Menu_Enemy3.setOrigin(Menu_Enemy1.getSize() / 2.0f);
+	Menu_Enemy3.setPosition(420.0f, 280.0f);
+	Menu_Enemy3.setTexture(enemyTexture[0]);
+	Menu_Enemy3.setTextureRect(sf::IntRect((enemyTexture[0]->getSize().x / 10) * 2, 0, enemyTexture[0]->getSize().x / 10, enemyTexture[0]->getSize().y));
+
+	sf::RectangleShape Menu_HighScore_BG;
+	Menu_HighScore_BG.setSize(sf::Vector2f(500.0f, 300.0f));
+	Menu_HighScore_BG.setOrigin(Menu_HighScore_BG.getSize() / 2.0f);
+	Menu_HighScore_BG.setPosition(300.0f, 500.0f);
+	Menu_HighScore_BG.setTexture(&UIBG);
 	//Button
 	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 180.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "RESUME", &buttonBG, PAUSE, RESUME));
 	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 410.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "EXIT", &buttonBG, PAUSE, EXIT));
-	buttons.push_back(Button(sf::Vector2f(END_GAMEUIBG.getOrigin().x + 410.0f, END_GAMEUIBG.getOrigin().y + 285.0f),sf::Vector2f(195.0f, 70.0f), &font, "CONTINUE", &buttonBG, END_GAME,END_GAME_CONTINUE));
+	buttons.push_back(Button(sf::Vector2f(END_GAMEUIBG.getOrigin().x + 410.0f, END_GAMEUIBG.getOrigin().y + 285.0f), sf::Vector2f(195.0f, 70.0f), &font, "CONTINUE", &buttonBG, END_GAME, END_GAME_CONTINUE));
+	buttons.push_back(Button(sf::Vector2f(830.0f, 360.0f), sf::Vector2f(280.0f, 100.0f), &font, "START", &buttonBG, MENU, MENU_START));
+	buttons.push_back(Button(sf::Vector2f(830.0f, 480.0f), sf::Vector2f(280.0f, 100.0f), &font, "HIGHSCORE", &buttonBG, MENU, MENU_HIGHSCORE));
+	buttons.push_back(Button(sf::Vector2f(830.0f, 600.0f), sf::Vector2f(280.0f, 100.0f), &font, "EXIT", &buttonBG, MENU, MENU_EXIT));
+	//Textbox
+	Textbox textbox1(18, sf::Color::White, false, font, sf::Vector2f(710.0f, 250.0f));
+
+	//HIGHSCORE
+	std::vector<std::pair<int, std::string>> highScore;
+	FILE* file;
+	char temp[25];
+	std::string nameArr[6];
+	int scoreArr[6];
+	bool collectHS = false;
+	file = fopen("./highScore.txt", "r");
+	for (int i = 0;i < 5;i++) {
+		fscanf(file, "%s", temp);
+		nameArr[i] = temp;
+		fscanf(file, "%d", &scoreArr[i]);
+		highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
+	}
+	
+	//Sound
+	bool playGameMusic = false;
+	bool playMenuMusic = false;
+	sf::SoundBuffer laserFiredBuffer;
+	sf::Sound laserFiredSF;
+	laserFiredBuffer.loadFromFile("./Soundtrack/laserGun.wav");
+	laserFiredSF.setBuffer(laserFiredBuffer);
+	laserFiredSF.setVolume(10);
+
+	sf::SoundBuffer playerShootBuffer;
+	sf::Sound playerShootSF;
+	playerShootBuffer.loadFromFile("./Soundtrack/Shoot.wav");
+	playerShootSF.setBuffer(playerShootBuffer);
+	playerShootSF.setVolume(5);
+
+	sf::SoundBuffer enemyHitBuffer;
+	sf::Sound enemyHitSF;
+	enemyHitBuffer.loadFromFile("./Soundtrack/enemyHit.wav");
+	enemyHitSF.setBuffer(enemyHitBuffer);
+	enemyHitSF.setVolume(5);
+
+	sf::SoundBuffer boxHitBuffer;
+	sf::Sound boxHitSF;
+	boxHitBuffer.loadFromFile("./Soundtrack/boxHit.wav");
+	boxHitSF.setBuffer(boxHitBuffer);
+	boxHitSF.setVolume(5);
+
+	sf::Music gameMusic;
+	gameMusic.openFromFile("./Soundtrack/InGameMusic.wav");
+	gameMusic.setVolume(10);
+	gameMusic.setLoop(true);
+
+	sf::Music menuMusic;
+	menuMusic.openFromFile("./Soundtrack/InMenuMusic.wav");
+	menuMusic.setVolume(5);
+	menuMusic.setLoop(true);
+
 
 	while (window.isOpen())
 	{
-		sf::Event evnt;
-		while (window.pollEvent(evnt)) {
-			switch (evnt.type) {
-			case sf::Event::Closed:
-				window.close();
-				break;
-			case sf::Event::Resized:
-
+		sf::Event event;
+		while (window.pollEvent(event)) {
+			switch (event.type) {
+			case sf::Event::TextEntered:
+				textbox1.typedOn(event);
 				break;
 			}
 		}
 		state.Update();
+		if (state.isCloseGame()) {
+			window.close();
+		}
+		if (state.getGameState() == MENU) {
+			if (!playMenuMusic) {
+				menuMusic.play();
+				gameMusic.stop();
+				playMenuMusic = true;
+				playGameMusic = false;
+			}
+			score = 0;
+			gameClock.restart();
+			std::cout << highScore.size() << std::endl;
+			if (state.isShowHighscore()) {
+				if (!state.isPushButton()) {
+					highScore.erase(highScore.begin(), highScore.end());
+					file = fopen("./highScore.txt", "r");
+					for (int i = 0;i < 5;i++) {
+						fscanf(file, "%s", temp);
+						nameArr[i] = temp;
+						fscanf(file, "%d", &scoreArr[i]);
+						highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
+					}
+					buttons.push_back(Button(sf::Vector2f(500.0f, 630.0f), sf::Vector2f(180.0f, 90.0f), &font, "CLOSE", &buttonBG, MENU, MENU_HIGHSCORE_EXIT));
+					state.setPushButton(true);
+				}
+			}
+		}
 		if (state.getGameState() == PAUSE) {
 			escGameClock.restart();
 			state.setPauseTime(escPauseClock.getElapsedTime().asSeconds());
@@ -210,6 +349,13 @@ int main()
 		}
 
 		if (state.getGameState() == GAME) {
+			collectHS = false;
+			if (!playGameMusic) {
+				gameMusic.play();
+				menuMusic.stop();
+				playGameMusic = true;
+				playMenuMusic = false;
+			}
 			if (pauseTime != 0.0f)
 				escPauseClock.restart();
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) && escGameClock.getElapsedTime().asMilliseconds() > delayEsc) {
@@ -229,19 +375,34 @@ int main()
 				deltaTime = 1.0f / 60.0f;
 			}
 			sf::Vector2f direction;
-			if (delayEnemySpawn > std::fmax(1000.0f, std::fmax((std::fmod(rand(), enemyRespawnTimeClamp + 1)), enemyRespawnTimeClamp)) && gameTime > 5.0f) {
+			if (delayEnemySpawn > std::fmax(1300.0f, std::fmax((std::fmod(rand(), enemyRespawnTimeClamp + 1)), enemyRespawnTimeClamp)) && gameTime > 5.0f) {
 				int temprand = rand() % 2;
 				createEnemy(enemies, temprand, enemyTexture, gameTime);
 				delayEnemySpawnClock.restart();
-				if (enemyRespawnTimeClamp > 1000.0f) {
+				if (enemyRespawnTimeClamp > 1300.0f) {
 					enemyRespawnTimeClamp -= 5.0f;
 				}
-				if (enemyRespawnTimeClamp <= 1000.0f) {
+				if (enemyRespawnTimeClamp <= 1300.0f) {
 					enemyRespawnTimeClamp = 1500.0f;
 				}
 			}
 			player.Update(&playerTexture, deltaTime, gunTexture_R, &state);
 			if (player.isShooting() && delayShoot > player.getShootDelayTime()) {
+				if (player.GetGunType() == 0) {
+					playerShootSF.setPitch(1.0f);
+					playerShootSF.play();
+				}
+				if (player.GetGunType() == 1&& bullets.size()%2==1) {
+					playerShootSF.setPitch(1.2f);
+					playerShootSF.play();
+				}
+				if (player.GetGunType() == 2 ) {
+					playerShootSF.setPitch(0.5f);
+					playerShootSF.play();
+				}
+				if (player.GetGunType() == 3) {
+					laserFiredSF.play();
+				}
 				if (player.GetGunType() != 3) {
 					bullets.push_back(Bullet(&bulletTexture, player.GetGunType(), player.isFaceRight(), player.GetGunPosition()));
 				}
@@ -257,7 +418,7 @@ int main()
 			playerCollisionWithEnemy(enemies, player, playerCol, direction);
 			for (int i = 0;i < boxes.size();i++) {
 				Collider temp = boxes[i].GetCollider();
-				bulletCollisionWithBoxes(bullets, boxes[i], temp, direction);
+				bulletCollisionWithBoxes(bullets, boxes[i], temp, direction, &boxHitSF);
 				boxCollisionWithPlatforms(platforms, boxes[i], temp, direction);
 				boxCollisionWithPlatforms(walls, boxes[i], temp, direction);
 			}
@@ -266,7 +427,7 @@ int main()
 					Collider temp = enemies[i].GetCollider();
 					enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
 					enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
-					bulletCollisionWithEnemies(bullets, enemies[i], temp, direction);
+					bulletCollisionWithEnemies(bullets, enemies[i], temp, direction,&enemyHitSF);
 				}
 			}
 			for (int i = 0;i < bullets.size();i++) {
@@ -278,17 +439,41 @@ int main()
 			playerCollisionWithPlatforms(walls, player, playerCol, direction);
 			playerCollisionWithPlatforms(platforms, player, playerCol, direction);
 			playerCollisionWithPlatforms(spawns, player, playerCol, direction);
-
 		}
 		window.clear();
 		updateButtons(buttons, window, state.getGameState(), state);
 		pauseTime = 0.0f;
-		if (state.getGameState() == END_GAME) {
-			drawEND_GAME(END_GAMEUIBG, buttons, window, state.getGameState(), &font, score);
-			player.restart();
-			eraseEnemy(enemies);
-			gameTime = 0.0f;
-			gameClock.restart();
+		textbox1.Update(&state, sf::Mouse::getPosition(window));
+		if (state.getGameState() == MENU) {
+			cntFrame++;
+			if (cntFrame >= 10) {
+				BGScrollMENU += 1;
+				cntFrame = 0;
+			}
+			drawMENU(MENUBG, buttons, window, state.getGameState(), &font, BGScrollMENU);
+			window.draw(LogoBorder);
+			showText(sf::Vector2f(125.0f, 85.0f), "ULTRA", &font, 62, window);
+			showText(sf::Vector2f(180.0f, 155.0f), "CRATE", &font, 62, window);
+			showText(sf::Vector2f(125.0f, 225.0f), "BOX", &font, 62, window);
+			window.draw(Menu_Enemy1);
+			window.draw(Menu_Enemy2);
+			window.draw(Menu_Enemy3);
+			textbox1.Draw(window);
+			showText(sf::Vector2f(690.0f, 200.0f), "INPUT YOUR NAME", &font, 18, window);
+			if (state.isShowHighscore() && state.isPushButton()) {
+				window.draw(Menu_HighScore_BG);
+				showText(sf::Vector2f(100.0f, 395.0f), highScore[0].second, &font, 16, window);
+				showText(sf::Vector2f(320.0f, 395.0f), std::to_string(highScore[0].first), &font, 16, window);
+				showText(sf::Vector2f(100.0f, 445.0f), highScore[1].second, &font, 16, window);
+				showText(sf::Vector2f(320.0f, 445.0f), std::to_string(highScore[1].first), &font, 16, window);
+				showText(sf::Vector2f(100.0f, 495.0f), highScore[2].second, &font, 16, window);
+				showText(sf::Vector2f(320.0f, 495.0f), std::to_string(highScore[2].first), &font, 16, window);
+				showText(sf::Vector2f(100.0f, 545.0f), highScore[3].second, &font, 16, window);
+				showText(sf::Vector2f(320.0f, 545.0f), std::to_string(highScore[3].first), &font, 16, window);
+				showText(sf::Vector2f(100.0f, 595.0f), highScore[4].second, &font, 16, window);
+				showText(sf::Vector2f(320.0f, 595.0f), std::to_string(highScore[4].first), &font, 16, window);
+			}
+			drawButtons(buttons, window, state.getGameState());
 		}
 		if (state.getGameState() == GAME || state.getGameState() == PAUSE) {
 			window.draw(BG_Color);
@@ -307,11 +492,58 @@ int main()
 			if (state.getGameState() == PAUSE) {
 				drawPAUSE(pauseUIBG, buttons, window, state.getGameState(), &font);
 			}
+			name = textbox1.getName();
+		}
+		if (state.getGameState() == END_GAME) {
+			drawEND_GAME(END_GAMEUIBG, buttons, window, state.getGameState(), &font, score);
+			player.restart();
+			eraseEnemy(enemies);
+			eraseGun(guns);
+			eraseBox(boxes);
+			eraseBullet(bullets);
+			gameTime = 0.0f;
+			gameClock.restart();
+			textbox1.resetString();
+			showText(sf::Vector2f(350.0f, 450.0f), "NAME:", &font, 16, window);
+			showText(sf::Vector2f(350.0f, 480.0f), name, &font, 16, window);
+			if (!collectHS) {
+				highScore.erase(highScore.begin(), highScore.end());
+				file = fopen("./highScore.txt", "r");
+				for (int i = 0;i < 5;i++) {
+					fscanf(file, "%s", temp);
+					nameArr[i] = temp;
+					fscanf(file, "%d", &scoreArr[i]);
+					highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
+				}
+				if (name == "") {
+					name = "NoName";
+				}
+				highScore.push_back(std::make_pair(score, name));
+				std::sort(highScore.begin(), highScore.end());
+				for (int i = 5;i >= 1;i--) {
+					std::cout << highScore[i].first << " " << highScore[i].second << std::endl;
+				}
+				fclose(file);
+				file = fopen("./highScore.txt", "w");
+				char temp[26];
+				for (int i = 5;i >= 1;i--) {
+					strcpy(temp, highScore[i].second.c_str());
+					fprintf(file, "%s %d\n", temp, highScore[i].first);
+				}
+				fclose(file);
+				collectHS = true;
+			}
 
 		}
 		window.display();
 	}
 	return 0;
+}
+void drawMENU(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font, int frame) {
+	int speed = 2;
+	UIBG.setTextureRect(sf::IntRect((int)speed * frame, 0, 1080, 720));
+
+	window.draw(UIBG);
 }
 void playerCollisionWithEnemy(std::vector<Enemy>& vect, Player& player, Collider playerCol, sf::Vector2f direction) {
 	for (Enemy& enemy : vect) {
@@ -364,11 +596,12 @@ void platformCollisionWithBullets(std::vector<Platform>& vect, Bullet& bullet, C
 		}
 	}
 }
-void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collider col, sf::Vector2f direction) {
+void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collider col, sf::Vector2f direction, sf::Sound* sound) {
 	if (!enemy.isHit()) {
 		for (Bullet& bullet : vect) {
 			if (bullet.GetType() != 3) {
 				if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
+					sound->play();
 					bullet.setDestroy(true);
 					enemy.hitWithBullet(bullet);
 				}
@@ -383,13 +616,14 @@ void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collide
 		}
 	}
 }
-void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction) {
+void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction,sf::Sound* sound) {
 	for (Bullet& bullet : vect) {
 		if (box.isOnGround()) {
 			if (bullet.GetType() != 3) {
 				if (bullet.GetCollider().CheckCollision(col, direction, 1.0f)) {
 					bullet.setDestroy(true);
 					box.hitWithBullet(bullet);
+					sound->play();
 				}
 			}
 			else {
@@ -448,6 +682,14 @@ void updateButtons(std::vector<Button>& vect, sf::RenderWindow& window, int game
 		if (button.isShowInGameState() == gameState) {
 			button.Update(sf::Mouse::getPosition(window), &state);
 		}
+	}
+	for (int i = 0;i < vect.size();i++) {
+		if (!state.isShowHighscore()) {
+			if (vect[i].getType() == MENU_HIGHSCORE_EXIT) {
+				vect.erase(vect.begin() + i);
+			}
+		}
+
 	}
 }
 void updateBullet(std::vector<Bullet>& vect, float deltaTime) {
@@ -582,7 +824,7 @@ void drawPAUSE(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWin
 	showText(sf::Vector2f(UIBG.getPosition().x - 105.0f, UIBG.getPosition().y - 90.0f), "PAUSE", font, 48, window);
 	drawButtons(vect, window, gameState);
 }
-void drawEND_GAME(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font,int score) {
+void drawEND_GAME(sf::RectangleShape UIBG, std::vector<Button>& vect, sf::RenderWindow& window, int gameState, sf::Font* font, int score) {
 	window.draw(UIBG);
 	showText(sf::Vector2f(UIBG.getPosition().x - 115.0f, UIBG.getPosition().y - 110.0f), "SCORE", font, 48, window);
 	showText(sf::Vector2f(UIBG.getPosition().x - (15 * std::to_string(score).size()), UIBG.getPosition().y - 40.0f), std::to_string(score), font, 36, window);
@@ -595,5 +837,8 @@ void eraseBox(std::vector<Box>& vect) {
 	vect.erase(vect.begin(), vect.end());
 }
 void eraseGun(std::vector<Gun>& vect) {
+	vect.erase(vect.begin(), vect.end());
+}
+void eraseBullet(std::vector<Bullet>& vect) {
 	vect.erase(vect.begin(), vect.end());
 }

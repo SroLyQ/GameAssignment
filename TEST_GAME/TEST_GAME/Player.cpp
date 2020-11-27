@@ -21,6 +21,15 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 	this->canJump = true;
 	this->shootingBool = false;
 	this->isDeadBool = false;
+	this->playerJumpBuffer.loadFromFile("./Soundtrack/playerJump.wav");
+	this->playerJumpSF.setBuffer(this->playerJumpBuffer);
+	this->playerJumpSF.setVolume(10);
+	this->playerDeadBuffer.loadFromFile("./Soundtrack/playerDead.wav");
+	this->playerDeadSF.setBuffer(this->playerDeadBuffer);
+	this->playerDeadSF.setVolume(10);
+	this->playerHitBuffer.loadFromFile("./Soundtrack/playerHit.wav");
+	this->playerHitSF.setBuffer(this->playerHitBuffer);
+	this->playerHitSF.setVolume(10);
 
 	iconTexture.loadFromFile("./Sprite/Player/icon.png");
 	fullHeartTexture.loadFromFile("./Sprite/Player/FullHeart.png");
@@ -68,8 +77,11 @@ Player::~Player()
 }
 void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Texture*> gunTexture_R, State* state)
 {
-	if (!isDeadBool && state->getGameState() == GAME) {
-		
+	if (!isDeadBool && (state->getGameState() == GAME ||state->getGameState()== PAUSE)) {
+		if (hp <= 0) {
+			isDeadBool = true;
+			playSoundEffect(&playerDeadSF);
+		}
 		shootingBool = false;
 		velocity.x = 0.0f;
 		if (isImmuneBool) {
@@ -181,6 +193,7 @@ void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Textu
 			gunType3Clock.restart();
 			pauseTimeGun = 0.0f;
 			restartClock = false;
+			delayShoot = 0.0f;
 		}
 		if (gunType1ClockFloat - pauseTimeGun > 8.0f) {
 			this->gunType = 0;
@@ -214,6 +227,7 @@ void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Textu
 			velocity.x += speed;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && canJump) {
 			canJump = false;
+			playSoundEffect(&playerJumpSF);
 			velocity.y = -sqrtf(2.0f * 981.0f * jumpHeight);
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
@@ -241,7 +255,7 @@ void Player::Update(sf::Texture* texture, float deltaTime, std::vector<sf::Textu
 		bodyTexture.setPosition(body.getPosition());
 	}
 	else {
-
+		state->setGameState(END_GAME);
 	}
 }
 
@@ -285,9 +299,15 @@ void Player::setGunTexture(sf::Texture* texture)
 	gunTextureRec.setTexture(texture);
 }
 
+void Player::playSoundEffect(sf::Sound* sound)
+{
+	sound->play();
+}
+
 void Player::changeHp(int hpChanger)
 {
 	this->hp += hpChanger;
+	playSoundEffect(&playerHitSF);
 }
 
 void Player::setIsImmune(bool isImmune)
@@ -320,4 +340,5 @@ void Player::restart()
 	this->isDeadBool = false;
 
 	body.setPosition(540.0f, 50.0f);
+	bodyTexture.setFillColor(sf::Color(255,255,255,255));
 }

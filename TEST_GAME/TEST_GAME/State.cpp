@@ -4,8 +4,10 @@ State::State()
 {
 	this->delayButtonPress = 0.0f;
 	this->activeDelayButton = false;
-	this->gameState = GAME;
+	this->gameState = MENU;
+	this->activeHighscore = false;
 	this->pauseTime = 0.0f;
+	this->closeGame = false;
 }
 
 void State::setGameState(int gameState)
@@ -21,6 +23,21 @@ void State::setPauseTime(float pauseTime)
 void State::setActiveDelayButton(bool activeDelayButton)
 {
 	this->activeDelayButton = activeDelayButton;
+}
+
+void State::setShowHighScore(bool active)
+{
+	this->activeHighscore = active;
+}
+
+void State::setCloseGame(bool active)
+{
+	this->closeGame = active;
+}
+
+void State::setPushButton(bool active)
+{
+	this->isPushBool = active;
 }
 
 void State::Update()

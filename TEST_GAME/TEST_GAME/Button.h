@@ -9,6 +9,7 @@ class Button
 		void Draw(sf::RenderWindow& window);
 
 		int isShowInGameState() { return state; }
+		int getType() { return type; }
 	private:
 		sf::RectangleShape body;
 		sf::Font* font;

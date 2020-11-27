@@ -14,6 +14,7 @@ public:
 	void OnCollision(sf::Vector2f direction);
 	void setGunType(int gunType);
 	void setGunTexture(sf::Texture* texture);
+	void playSoundEffect(sf::Sound* sound);
 	void changeHp(int hpChanger);
 	void setIsImmune(bool isImmune);
 	void setPauseTime(float pauseTime);
@@ -46,6 +47,12 @@ private:
 	sf::Clock gunType2Clock;
 	sf::Clock gunType3Clock;
 	sf::Clock immuneClock;
+	sf::SoundBuffer playerJumpBuffer;
+	sf::Sound playerJumpSF;
+	sf::SoundBuffer playerDeadBuffer;
+	sf::Sound playerDeadSF;
+	sf::SoundBuffer playerHitBuffer;
+	sf::Sound playerHitSF;
 	Animation animation;
 
 	float gunType1ClockFloat;

@@ -35,6 +35,7 @@ private:
 	sf::RectangleShape body;
 	sf::Clock timeAliveClock;
 	Animation animation;
+	
 
 	int randomInt;
 	int randomInt2;
