@@ -2,21 +2,20 @@
 #include "Initial.h"
 class Button
 {
-	public:
-		Button(sf::Vector2f position , sf::Vector2f size, sf::Font* font, std::string text, sf::Texture* texture, int state, int type);
-		
-		void Update(sf::Vector2i mousePos, State* gameState);
-		void Draw(sf::RenderWindow& window);
+public:
+	Button(sf::Vector2f position, sf::Vector2f size, sf::Font* font, std::string text, sf::Texture* texture, int state, int type);
 
-		int isShowInGameState() { return state; }
-		int getType() { return type; }
-	private:
-		sf::RectangleShape body;
-		sf::Font* font;
-		sf::Text text;
+	void Update(sf::Vector2i mousePos, State* gameState);
+	void Draw(sf::RenderWindow& window);
 
-		int state;
-		int type;
-		bool pressed;
+	int isShowInGameState() { return state; }
+	int getType() { return type; }
+private:
+	sf::RectangleShape body;
+	sf::Font* font;
+	sf::Text text;
+
+	int state;
+	int type;
+	bool pressed;
 };
-

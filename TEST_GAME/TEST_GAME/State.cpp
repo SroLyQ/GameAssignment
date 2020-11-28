@@ -6,6 +6,7 @@ State::State()
 	this->activeDelayButton = false;
 	this->gameState = MENU;
 	this->activeHighscore = false;
+	this->activeHowToPlay = false;
 	this->pauseTime = 0.0f;
 	this->closeGame = false;
 }
@@ -28,6 +29,11 @@ void State::setActiveDelayButton(bool activeDelayButton)
 void State::setShowHighScore(bool active)
 {
 	this->activeHighscore = active;
+}
+
+void State::setShowHowToPlay(bool active)
+{
+	this->activeHowToPlay = active;
 }
 
 void State::setCloseGame(bool active)

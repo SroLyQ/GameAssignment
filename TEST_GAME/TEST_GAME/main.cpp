@@ -77,6 +77,7 @@ int main()
 	sf::Texture bulletTexture;
 	sf::Texture laserTexture;
 	sf::Texture UIBG;
+	sf::Texture HowToPlayBG;
 	sf::Texture buttonBG;
 	sf::Texture MENUtexture;
 	sf::Texture LogoBorderTexture;
@@ -104,6 +105,7 @@ int main()
 	enemyTexture.push_back(&enemyTexture1);
 	enemyTexture.push_back(&enemyTexture2);
 	UIBG.loadFromFile("./Sprite/Object/UIbg.png");
+	HowToPlayBG.loadFromFile("./Sprite/Object/UIHowToPlaybg.png");
 	buttonBG.loadFromFile("./Sprite/Object/buttonBG.png");
 	MENUtexture.loadFromFile("./Sprite/Background/MENUBG.png");
 	/// Window ///
@@ -234,13 +236,20 @@ int main()
 	Menu_HighScore_BG.setOrigin(Menu_HighScore_BG.getSize() / 2.0f);
 	Menu_HighScore_BG.setPosition(300.0f, 500.0f);
 	Menu_HighScore_BG.setTexture(&UIBG);
+
+	sf::RectangleShape Menu_HowToPlay_BG;
+	Menu_HowToPlay_BG.setSize(sf::Vector2f(990.0f,660.0f));
+	Menu_HowToPlay_BG.setOrigin(Menu_HowToPlay_BG.getSize() / 2.0f);
+	Menu_HowToPlay_BG.setPosition(540.0f, 360.0f);
+	Menu_HowToPlay_BG.setTexture(&HowToPlayBG);
 	//Button
 	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 180.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "RESUME", &buttonBG, PAUSE, RESUME));
 	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 410.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "EXIT", &buttonBG, PAUSE, EXIT));
 	buttons.push_back(Button(sf::Vector2f(END_GAMEUIBG.getOrigin().x + 410.0f, END_GAMEUIBG.getOrigin().y + 285.0f), sf::Vector2f(195.0f, 70.0f), &font, "CONTINUE", &buttonBG, END_GAME, END_GAME_CONTINUE));
 	buttons.push_back(Button(sf::Vector2f(830.0f, 360.0f), sf::Vector2f(280.0f, 100.0f), &font, "START", &buttonBG, MENU, MENU_START));
 	buttons.push_back(Button(sf::Vector2f(830.0f, 480.0f), sf::Vector2f(280.0f, 100.0f), &font, "HIGHSCORE", &buttonBG, MENU, MENU_HIGHSCORE));
-	buttons.push_back(Button(sf::Vector2f(830.0f, 600.0f), sf::Vector2f(280.0f, 100.0f), &font, "EXIT", &buttonBG, MENU, MENU_EXIT));
+	buttons.push_back(Button(sf::Vector2f(917.5f, 600.0f), sf::Vector2f(110.0f, 100.0f), &font, "EXIT", &buttonBG, MENU, MENU_EXIT));
+	buttons.push_back(Button(sf::Vector2f(770.0f, 600.0f), sf::Vector2f(160.0f, 100.0f), &font, "TUTORIAL", &buttonBG, MENU, MENU_HOWTOPLAY));
 	//Textbox
 	Textbox textbox1(18, sf::Color::White, false, font, sf::Vector2f(710.0f, 250.0f));
 
@@ -258,7 +267,7 @@ int main()
 		fscanf(file, "%d", &scoreArr[i]);
 		highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
 	}
-	
+
 	//Sound
 	bool playGameMusic = false;
 	bool playMenuMusic = false;
@@ -330,7 +339,13 @@ int main()
 						fscanf(file, "%d", &scoreArr[i]);
 						highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
 					}
-					buttons.push_back(Button(sf::Vector2f(500.0f, 630.0f), sf::Vector2f(180.0f, 90.0f), &font, "CLOSE", &buttonBG, MENU, MENU_HIGHSCORE_EXIT));
+					buttons.push_back(Button(sf::Vector2f(550.0f, 630.0f), sf::Vector2f(180.0f, 90.0f), &font, "CLOSE", &buttonBG, MENU, MENU_HIGHSCORE_EXIT));
+					state.setPushButton(true);
+				}
+			}
+			if (state.isShowHowToPlay()) {
+				if (!state.isPushButton()) {
+					buttons.push_back(Button(sf::Vector2f(970.0f, 660.0f), sf::Vector2f(180.0f, 90.0f), &font, "CLOSE", &buttonBG, MENU, MENU_HOWTOPLAY_EXIT));
 					state.setPushButton(true);
 				}
 			}
@@ -394,11 +409,11 @@ int main()
 					playerShootSF.setPitch(1.0f);
 					playerShootSF.play();
 				}
-				if (player.GetGunType() == 1&& bullets.size()%2==1) {
+				if (player.GetGunType() == 1 && bullets.size() % 2 == 1) {
 					playerShootSF.setPitch(1.2f);
 					playerShootSF.play();
 				}
-				if (player.GetGunType() == 2 ) {
+				if (player.GetGunType() == 2) {
 					playerShootSF.setPitch(0.5f);
 					playerShootSF.play();
 				}
@@ -418,7 +433,7 @@ int main()
 			updateBoxes(boxes, deltaTime, guns, gunTexture_R);
 			updateGuns(guns, deltaTime, state);
 			playerCollisionWithEnemy(enemies, player, playerCol, direction);
-			if (spawns[1].GetCollider().CheckCollision(playerCol,direction,1.0f)) {
+			if (spawns[1].GetCollider().CheckCollision(playerCol, direction, 1.0f)) {
 				if (!player.isImmune()) {
 					player.setIsImmune(true);
 					player.changeHp(-1);
@@ -435,7 +450,7 @@ int main()
 					Collider temp = enemies[i].GetCollider();
 					enemyCollisionWithPlatforms(walls, enemies[i], temp, direction);
 					enemyCollisionWithPlatforms(platforms, enemies[i], temp, direction);
-					bulletCollisionWithEnemies(bullets, enemies[i], temp, direction,&enemyHitSF);
+					bulletCollisionWithEnemies(bullets, enemies[i], temp, direction, &enemyHitSF);
 				}
 			}
 			for (int i = 0;i < bullets.size();i++) {
@@ -463,6 +478,7 @@ int main()
 			showText(sf::Vector2f(125.0f, 85.0f), "ULTRA", &font, 62, window);
 			showText(sf::Vector2f(180.0f, 155.0f), "CRATE", &font, 62, window);
 			showText(sf::Vector2f(125.0f, 225.0f), "BOX", &font, 62, window);
+			showText(sf::Vector2f(560.0f, 10.0f), "63011086 Isara Phadungprasertkul", &font, 16, window);
 			window.draw(Menu_Enemy1);
 			window.draw(Menu_Enemy2);
 			window.draw(Menu_Enemy3);
@@ -482,6 +498,14 @@ int main()
 				showText(sf::Vector2f(320.0f, 595.0f), std::to_string(highScore[4].first), &font, 16, window);
 			}
 			drawButtons(buttons, window, state.getGameState());
+			if (state.isShowHowToPlay()) {
+				window.draw(Menu_HowToPlay_BG);
+			}
+			for (Button& button : buttons) {
+				if (button.isShowInGameState() == state.getGameState() && button.getType() == MENU_HOWTOPLAY_EXIT) {
+					button.Draw(window);
+				}
+			}
 		}
 		if (state.getGameState() == GAME || state.getGameState() == PAUSE) {
 			window.draw(BG_Color);
@@ -621,7 +645,7 @@ void bulletCollisionWithEnemies(std::vector<Bullet>& vect, Enemy& enemy, Collide
 		}
 	}
 }
-void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction,sf::Sound* sound) {
+void bulletCollisionWithBoxes(std::vector<Bullet>& vect, Box& box, Collider col, sf::Vector2f direction, sf::Sound* sound) {
 	for (Bullet& bullet : vect) {
 		if (box.isOnGround()) {
 			if (bullet.GetType() != 3) {
@@ -677,14 +701,17 @@ void drawGuns(std::vector<Gun>& vect, sf::RenderWindow& window) {
 }
 void drawButtons(std::vector<Button>& vect, sf::RenderWindow& window, int gameState) {
 	for (Button& button : vect) {
-		if (button.isShowInGameState() == gameState) {
+		if (button.isShowInGameState() == gameState && button.getType() != MENU_HOWTOPLAY_EXIT ) {
 			button.Draw(window);
 		}
 	}
 }
 void updateButtons(std::vector<Button>& vect, sf::RenderWindow& window, int gameState, State& state) {
 	for (Button& button : vect) {
-		if (button.isShowInGameState() == gameState) {
+		if (button.isShowInGameState() == gameState && !state.isShowHowToPlay()) {
+			button.Update(sf::Mouse::getPosition(window), &state);
+		}
+		else if (button.isShowInGameState() == gameState && state.isShowHowToPlay() && button.getType() == MENU_HOWTOPLAY_EXIT) {
 			button.Update(sf::Mouse::getPosition(window), &state);
 		}
 	}
@@ -694,7 +721,13 @@ void updateButtons(std::vector<Button>& vect, sf::RenderWindow& window, int game
 				vect.erase(vect.begin() + i);
 			}
 		}
-
+	}
+	for (int i = 0;i < vect.size();i++) {
+		if (!state.isShowHowToPlay()) {
+			if (vect[i].getType() == MENU_HOWTOPLAY_EXIT) {
+				vect.erase(vect.begin() + i);
+			}
+		}
 	}
 }
 void updateBullet(std::vector<Bullet>& vect, float deltaTime) {

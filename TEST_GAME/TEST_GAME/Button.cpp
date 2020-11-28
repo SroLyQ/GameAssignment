@@ -41,10 +41,21 @@ Button::Button(sf::Vector2f position, sf::Vector2f size, sf::Font* font, std::st
 		this->text.setFillColor(sf::Color::Red);
 		this->text.setCharacterSize(24);
 		break;
-	case MENU_EXIT:
-		this->text.setPosition(sf::Vector2f(position.x - 60.0f, position.y - 11.0f));
+	case MENU_HOWTOPLAY:
+		this->text.setPosition(sf::Vector2f(position.x - 70.0f, position.y - 11.0f));
+		this->text.setFillColor(sf::Color::White);
+		this->text.setCharacterSize(18);
+		break;
+	case MENU_HOWTOPLAY_EXIT:
+		this->text.setPosition(sf::Vector2f(position.x - 68.0f, position.y - 11.0f));
 		this->text.setFillColor(sf::Color::Red);
-		this->text.setCharacterSize(32);
+		this->text.setCharacterSize(28);
+		break;
+
+	case MENU_EXIT:
+		this->text.setPosition(sf::Vector2f(position.x - 40.0f, position.y - 11.0f));
+		this->text.setFillColor(sf::Color::Red);
+		this->text.setCharacterSize(20);
 		break;
 	}
 	this->text.setOutlineColor(sf::Color::Black);
@@ -76,13 +87,22 @@ void Button::Update(sf::Vector2i mousePos, State* gameState)
 			case MENU_HIGHSCORE:
 				gameState->setGameState(MENU);
 				gameState->setShowHighScore(true);
-				if (gameState->isPushButton()) {
-					gameState->setPushButton(false);
-				}
 				break;
 			case MENU_HIGHSCORE_EXIT:
 				gameState->setGameState(MENU);
 				gameState->setShowHighScore(false);
+				gameState->setPushButton(false);
+				break;
+			case MENU_HOWTOPLAY:
+				gameState->setShowHighScore(false);
+				gameState->setPushButton(false);
+				gameState->setShowHowToPlay(true);
+				break;
+			case MENU_HOWTOPLAY_EXIT:
+				gameState->setGameState(MENU);
+				gameState->setShowHowToPlay(false);
+				gameState->setPushButton(false);
+
 				break;
 			case MENU_EXIT:
 				gameState->setCloseGame(true);
