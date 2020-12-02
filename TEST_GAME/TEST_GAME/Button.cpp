@@ -1,6 +1,6 @@
 #include "Button.h"
 
-Button::Button(sf::Vector2f position, sf::Vector2f size, sf::Font* font, std::string text, sf::Texture* texture, int state, int type)
+Button::Button(sf::Vector2f position, sf::Vector2f size, sf::Font* font, std::string text, sf::Texture* texture, int state, int type, sf::SoundBuffer* buttonHitBuffer)
 {
 	body.setSize(size);
 	body.setOrigin(body.getSize() / 2.0f);
@@ -10,6 +10,9 @@ Button::Button(sf::Vector2f position, sf::Vector2f size, sf::Font* font, std::st
 	this->type = type;
 	this->font = font;
 	this->text.setFont(*this->font);
+	buttonHitSF.setBuffer(*buttonHitBuffer);
+	buttonHitSF.setVolume(100);
+	
 	switch (type) {
 	case RESUME:
 		this->text.setPosition(sf::Vector2f(position.x - 70.0f, position.y - 11.0f));
@@ -67,6 +70,7 @@ void Button::Update(sf::Vector2i mousePos, State* gameState)
 {
 	if (this->body.getGlobalBounds().contains(sf::Vector2f(mousePos))) {
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !gameState->isActiveDelayButton()) {
+			buttonHitSF.play();
 			gameState->setActiveDelayButton(true);
 			body.setFillColor(sf::Color(133.0f, 87.0f, 35.0f));
 			switch (type) {

@@ -242,14 +242,7 @@ int main()
 	Menu_HowToPlay_BG.setOrigin(Menu_HowToPlay_BG.getSize() / 2.0f);
 	Menu_HowToPlay_BG.setPosition(540.0f, 360.0f);
 	Menu_HowToPlay_BG.setTexture(&HowToPlayBG);
-	//Button
-	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 180.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "RESUME", &buttonBG, PAUSE, RESUME));
-	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 410.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "EXIT", &buttonBG, PAUSE, EXIT));
-	buttons.push_back(Button(sf::Vector2f(END_GAMEUIBG.getOrigin().x + 410.0f, END_GAMEUIBG.getOrigin().y + 285.0f), sf::Vector2f(195.0f, 70.0f), &font, "CONTINUE", &buttonBG, END_GAME, END_GAME_CONTINUE));
-	buttons.push_back(Button(sf::Vector2f(830.0f, 360.0f), sf::Vector2f(280.0f, 100.0f), &font, "START", &buttonBG, MENU, MENU_START));
-	buttons.push_back(Button(sf::Vector2f(830.0f, 480.0f), sf::Vector2f(280.0f, 100.0f), &font, "HIGHSCORE", &buttonBG, MENU, MENU_HIGHSCORE));
-	buttons.push_back(Button(sf::Vector2f(917.5f, 600.0f), sf::Vector2f(110.0f, 100.0f), &font, "EXIT", &buttonBG, MENU, MENU_EXIT));
-	buttons.push_back(Button(sf::Vector2f(770.0f, 600.0f), sf::Vector2f(160.0f, 100.0f), &font, "TUTORIAL", &buttonBG, MENU, MENU_HOWTOPLAY));
+	
 	//Textbox
 	Textbox textbox1(18, sf::Color::White, false, font, sf::Vector2f(710.0f, 250.0f));
 
@@ -283,6 +276,9 @@ int main()
 	playerShootSF.setBuffer(playerShootBuffer);
 	playerShootSF.setVolume(5);
 
+	sf::SoundBuffer buttonHitBuffer;
+	buttonHitBuffer.loadFromFile("./Soundtrack/bt.wav");
+
 	sf::SoundBuffer enemyHitBuffer;
 	sf::Sound enemyHitSF;
 	enemyHitBuffer.loadFromFile("./Soundtrack/enemyHit.wav");
@@ -305,6 +301,14 @@ int main()
 	menuMusic.setVolume(5);
 	menuMusic.setLoop(true);
 
+	//Button
+	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 180.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "RESUME", &buttonBG, PAUSE, RESUME, &buttonHitBuffer));
+	buttons.push_back(Button(sf::Vector2f(pauseUIBG.getOrigin().x + 410.0f, pauseUIBG.getOrigin().y + 285.0f), sf::Vector2f(180.0f, 70.0f), &font, "EXIT", &buttonBG, PAUSE, EXIT, &buttonHitBuffer));
+	buttons.push_back(Button(sf::Vector2f(END_GAMEUIBG.getOrigin().x + 410.0f, END_GAMEUIBG.getOrigin().y + 285.0f), sf::Vector2f(195.0f, 70.0f), &font, "CONTINUE", &buttonBG, END_GAME, END_GAME_CONTINUE, &buttonHitBuffer));
+	buttons.push_back(Button(sf::Vector2f(830.0f, 360.0f), sf::Vector2f(280.0f, 100.0f), &font, "START", &buttonBG, MENU, MENU_START, &buttonHitBuffer));
+	buttons.push_back(Button(sf::Vector2f(830.0f, 480.0f), sf::Vector2f(280.0f, 100.0f), &font, "HIGHSCORE", &buttonBG, MENU, MENU_HIGHSCORE, &buttonHitBuffer));
+	buttons.push_back(Button(sf::Vector2f(917.5f, 600.0f), sf::Vector2f(110.0f, 100.0f), &font, "EXIT", &buttonBG, MENU, MENU_EXIT, &buttonHitBuffer));
+	buttons.push_back(Button(sf::Vector2f(770.0f, 600.0f), sf::Vector2f(160.0f, 100.0f), &font, "TUTORIAL", &buttonBG, MENU, MENU_HOWTOPLAY, &buttonHitBuffer));
 
 	while (window.isOpen())
 	{
@@ -339,13 +343,13 @@ int main()
 						fscanf(file, "%d", &scoreArr[i]);
 						highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
 					}
-					buttons.push_back(Button(sf::Vector2f(550.0f, 630.0f), sf::Vector2f(180.0f, 90.0f), &font, "CLOSE", &buttonBG, MENU, MENU_HIGHSCORE_EXIT));
+					buttons.push_back(Button(sf::Vector2f(550.0f, 630.0f), sf::Vector2f(180.0f, 90.0f), &font, "CLOSE", &buttonBG, MENU, MENU_HIGHSCORE_EXIT, &buttonHitBuffer));
 					state.setPushButton(true);
 				}
 			}
 			if (state.isShowHowToPlay()) {
 				if (!state.isPushButton()) {
-					buttons.push_back(Button(sf::Vector2f(970.0f, 660.0f), sf::Vector2f(180.0f, 90.0f), &font, "CLOSE", &buttonBG, MENU, MENU_HOWTOPLAY_EXIT));
+					buttons.push_back(Button(sf::Vector2f(970.0f, 660.0f), sf::Vector2f(180.0f, 90.0f), &font, "CLOSE", &buttonBG, MENU, MENU_HOWTOPLAY_EXIT, &buttonHitBuffer));
 					state.setPushButton(true);
 				}
 			}

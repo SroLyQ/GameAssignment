@@ -1,2 +1,5 @@
-﻿  Textbox.cpp
+﻿  main.cpp
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(46,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(754,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\TEST_GAME\main.cpp(788,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
   TEST_GAME.vcxproj -> C:\Users\user\Desktop\CE\FirstYear\ProgramFundamental\Game\Game\TEST_GAME\x64\Debug\TEST_GAME.exe
