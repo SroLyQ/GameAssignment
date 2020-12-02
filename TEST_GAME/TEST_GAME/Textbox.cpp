@@ -41,7 +41,7 @@ void Textbox::Draw(sf::RenderWindow& window)
 
 void Textbox::typedOn(sf::Event input)
 {
-	if (isSelectedBool) {
+	if (isSelectedBool && !sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
 		int charTyped = input.text.unicode;
 		if (charTyped < 128) {
 			if (hasLimit) {
@@ -70,10 +70,10 @@ void Textbox::Update(State* state, sf::Vector2i mousePos)
 				state->setActiveDelayButton(true);
 				this->isSelectedBool = !this->isSelectedBool;
 				if (isSelectedBool) {
-					textbox.setString("|");
+					textbox.setString(text.str()+"|");
 				}
 				else {
-					textbox.setString("");
+					textbox.setString(text.str());
 				}
 			}
 		}
